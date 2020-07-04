@@ -7,14 +7,15 @@
 
 import UIKit
 
-class PlanCell: UITableViewCell {
+class PlanCell: HomeViewController/*, UITableViewCell*/ {
     
     @IBOutlet weak var DateAndTimeLabel: UILabel!
-    // var receiveDateAndTime: String = ""
+    var receiveDateAndTime: String = ""
     
     override func awakeFromNib() {
         super.awakeFromNib()
-        // DateAndTimeLabel.text = receiveDateAndTime
+        // receiveDateAndTime = ["0000年00月00日　00時00分"]
+        //DateAndTimeLabel.text = DateAndTimes
         /*
         if UserDefaults.standard.object(forKey: "putDateAndTime") != nil {
             saveDateAndTime = UserDefaults.standard.object(forKey: "putDateAndTime") as! [String]

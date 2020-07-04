@@ -11,7 +11,7 @@ import UIKit
 
 class DateAndTimeCell: UITableViewCell {
     
-    @IBOutlet weak var displayDateAndTime: UITextField!
+    @IBOutlet weak var displayDateAndTimeTextField: UITextField!
     var datePicker: UIDatePicker = UIDatePicker()
     
     override func awakeFromNib() {
@@ -20,7 +20,7 @@ class DateAndTimeCell: UITableViewCell {
         datePicker.datePickerMode = UIDatePicker.Mode.dateAndTime
         datePicker.timeZone = NSTimeZone.local
         datePicker.locale = Locale.current
-        displayDateAndTime.inputView = datePicker
+        displayDateAndTimeTextField.inputView = datePicker
             
         // 決定バーの生成
         let toolbar = UIToolbar(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: 40))
@@ -28,12 +28,12 @@ class DateAndTimeCell: UITableViewCell {
         let doneItem = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(done))
         toolbar.setItems([spacelItem, doneItem], animated: true)
         // インプットビュー設定(紐づいているUITextfieldへ代入)
-        displayDateAndTime.inputView = datePicker
-        displayDateAndTime.inputAccessoryView = toolbar
+        displayDateAndTimeTextField.inputView = datePicker
+        displayDateAndTimeTextField.inputAccessoryView = toolbar
     }
     
     @objc func done() {
-        displayDateAndTime.endEditing(true)
+        displayDateAndTimeTextField.endEditing(true)
         
         // 日付のフォーマット
         let formatter = DateFormatter()
@@ -44,7 +44,7 @@ class DateAndTimeCell: UITableViewCell {
         formatter.locale = Locale(identifier: "ja_JP")
 
         //datePickerで指定した日付が表示される
-        displayDateAndTime.text = "\(formatter.string(from: datePicker.date))"
+        displayDateAndTimeTextField.text = "\(formatter.string(from: datePicker.date))"
     }
     
     override func setSelected(_ selected: Bool, animated: Bool) {

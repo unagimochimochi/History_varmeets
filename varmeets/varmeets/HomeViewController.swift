@@ -11,8 +11,20 @@ class HomeViewController: UIViewController, /*UISearchBarDelegate,*/ UITableView
     
     // @IBOutlet weak var searchBar: UISearchBar!
     
-    @IBOutlet weak var PlanTable: UITableView! // 現状使ってない
-    // var receiveDateAndTime: String = ""
+    @IBOutlet weak var PlanTable: UITableView!
+    var DateAndTimes = [String]()
+    
+    @IBAction func unwindtoHomeVC(sender: UIStoryboardSegue) {
+        guard let sourceVC = sender.source as? AddPlanViewController, let DateAndTime = sourceVC.DateAndTime else {
+            return
+        }
+        if let selectedIndexPath =  self.PlanTable.indexPathForSelectedRow {
+            self.DateAndTimes[selectedIndexPath.row] = DateAndTime
+        } else {
+            self.DateAndTimes.append(DateAndTime)
+        }
+        self.PlanTable.reloadData()
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()

@@ -12,6 +12,8 @@ import UIKit
 var saveDateAndTime = [String]() // datePickerで取得した日時を保存するための変数
 
 class AddPlanViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
+    
+    var DateAndTime: String?
 
     @IBOutlet weak var addPlanTable: UITableView!
     
@@ -21,20 +23,7 @@ class AddPlanViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
     
     // 保存ボタン
-    // @IBAction func saveButton(_ sender: Any) {
-        // print("保存ボタンがタップ")
-/*
-        //追加ボタンを押したらフィールドを空にする
-        DateAndTimeCell().displayDateAndTime.text = ""
-        //変数に入力内容を入れる
-        saveDateAndTime.append(DateAndTimeCell().displayDateAndTime.text!)
-        UserDefaults.standard.set(saveDateAndTime, forKey: "putDateAndTime" ) // forKeyはデータを保存する場所の名前（何でもOK）
- */
-        
-        // self.dismiss(animated: true, completion: nil)
- 
-    // }
-    
+    @IBOutlet weak var saveButton: UIBarButtonItem!
     
     var planItem = ["日時","参加者","場所","共有開始","通知"]
 
@@ -67,7 +56,7 @@ class AddPlanViewController: UIViewController, UITableViewDelegate, UITableViewD
         
         if indexPath.row == 0 {
             if let cell = tableView.cellForRow(at: indexPath) as? DateAndTimeCell {
-                cell.displayDateAndTime.becomeFirstResponder()
+                cell.displayDateAndTimeTextField.becomeFirstResponder()
             }
         } else {
             // 0番セル以外をクリックしたらキーボードを閉じる
@@ -76,10 +65,17 @@ class AddPlanViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any!) {
+        /*
         if (segue.identifier == "toReceiveTestVC") {
             let VC: ReceiveTestViewController = (segue.destination as? ReceiveTestViewController)!
             let indexPath = IndexPath(row: 0, section: 0)
-            VC.receiveData = (addPlanTable.cellForRow(at: indexPath) as? DateAndTimeCell)?.displayDateAndTime.text ?? ""
+            VC.receiveData = (addPlanTable.cellForRow(at: indexPath) as? DateAndTimeCell)?.displayDateAndTimeTextField.text ?? ""
         }
+        */
+        guard let button = sender as? UIBarButtonItem, button === self.saveButton else {
+            return
+        }
+        let indexPath = IndexPath(row: 0, section: 0)
+        self.DateAndTime = (addPlanTable.cellForRow(at: indexPath) as? DateAndTimeCell)?.displayDateAndTimeTextField.text ?? ""
     }
 }
