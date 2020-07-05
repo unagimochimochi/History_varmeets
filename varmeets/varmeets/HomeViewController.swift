@@ -18,7 +18,7 @@ class HomeViewController: UIViewController, /*UISearchBarDelegate,*/ UITableView
         guard let sourceVC = sender.source as? AddPlanViewController, let DateAndTime = sourceVC.DateAndTime else {
             return
         }
-        if let selectedIndexPath =  self.PlanTable.indexPathForSelectedRow {
+        if let selectedIndexPath = self.PlanTable.indexPathForSelectedRow {
             self.DateAndTimes[selectedIndexPath.row] = DateAndTime
         } else {
             self.DateAndTimes.append(DateAndTime)
@@ -28,6 +28,8 @@ class HomeViewController: UIViewController, /*UISearchBarDelegate,*/ UITableView
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        self.DateAndTimes = ["0000年00月00日　00時00分"]
         
         /*
         searchBar.delegate = self
@@ -43,18 +45,30 @@ class HomeViewController: UIViewController, /*UISearchBarDelegate,*/ UITableView
         // タイトル文字列の設定
         self.navigationItem.title = "ホーム"
     }
-        
+    
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
     }
+ 
+    
+    func numberOfSections(in tableView: UITableView) -> Int {
+        // #warning Incomplete implementation, return the number of sections
+        return 1
+    }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell: UITableViewCell = tableView.dequeueReusableCell(withIdentifier: "PlanCell", for: indexPath)
+        // let cell: UITableViewCell = tableView.dequeueReusableCell(withIdentifier: "PlanCell", for: indexPath)
+        let cell = tableView.dequeueReusableCell(withIdentifier: "PlanCell", for: indexPath)
+        
+        let DateAndTimeLabel = cell.viewWithTag(1) as! UILabel
+        DateAndTimeLabel.text = self.DateAndTimes[indexPath.row]
+        
         return cell
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return saveDateAndTime.count
+        return DateAndTimes.count
     }
     /*
     func searchBarSearchButtonClicked(_ searchBar:UISearchBar) {
