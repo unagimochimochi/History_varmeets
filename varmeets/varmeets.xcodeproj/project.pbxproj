@@ -18,7 +18,6 @@
 		A21F084B243F0A4F008837DD /* Friends_50px.png in Resources */ = {isa = PBXBuildFile; fileRef = A21F0848243F0A4F008837DD /* Friends_50px.png */; };
 		A21F084C243F0A4F008837DD /* Friends_75px.png in Resources */ = {isa = PBXBuildFile; fileRef = A21F0849243F0A4F008837DD /* Friends_75px.png */; };
 		A2215FC724983C68001EE72D /* DateAndTimeCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2215FC624983C68001EE72D /* DateAndTimeCell.swift */; };
-		A233851424A1EA0D00F265E8 /* ReceiveTestViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A233851324A1EA0D00F265E8 /* ReceiveTestViewController.swift */; };
 		A2545B70240635CB00C312FE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2545B6F240635CB00C312FE /* AppDelegate.swift */; };
 		A2545B72240635CB00C312FE /* HomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2545B71240635CB00C312FE /* HomeViewController.swift */; };
 		A2545B74240635CB00C312FE /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2545B73240635CB00C312FE /* MapViewController.swift */; };
@@ -28,7 +27,6 @@
 		A2545B87240635CD00C312FE /* varmeetsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2545B86240635CD00C312FE /* varmeetsTests.swift */; };
 		A2545B92240635CD00C312FE /* varmeetsUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2545B91240635CD00C312FE /* varmeetsUITests.swift */; };
 		A255A88F248F53D5006376AC /* Map.swift in Sources */ = {isa = PBXBuildFile; fileRef = A255A88E248F53D5006376AC /* Map.swift */; };
-		A26C1D8C24A0CDD500909F5C /* PlanCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A26C1D8B24A0CDD500909F5C /* PlanCell.swift */; };
 		A298E63E248A369D00A39E8C /* FriendProfileViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A298E63D248A369D00A39E8C /* FriendProfileViewController.swift */; };
 		A29A8F1C24872646003D4DC7 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A29A8F1B24872646003D4DC7 /* CoreLocation.framework */; };
 		A2CB97C4248479660096F85B /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A2CB97C3248479660096F85B /* MapKit.framework */; settings = {ATTRIBUTES = (Required, ); }; };
@@ -38,6 +36,7 @@
 		A2D29885243FD2EF00B482CE /* Fav_75px.png in Resources */ = {isa = PBXBuildFile; fileRef = A2D29884243FD2EF00B482CE /* Fav_75px.png */; };
 		A2E69128244038AF00422E92 /* FriendsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2E69127244038AF00422E92 /* FriendsViewController.swift */; };
 		A2E6912A24403C6100422E92 /* FavViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2E6912924403C6000422E92 /* FavViewController.swift */; };
+		A2ED060824B30B7E0025B703 /* PlanDetailsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2ED060724B30B7E0025B703 /* PlanDetailsViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -69,7 +68,6 @@
 		A21F0848243F0A4F008837DD /* Friends_50px.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Friends_50px.png; path = img/Friends_50px.png; sourceTree = SOURCE_ROOT; };
 		A21F0849243F0A4F008837DD /* Friends_75px.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Friends_75px.png; path = img/Friends_75px.png; sourceTree = SOURCE_ROOT; };
 		A2215FC624983C68001EE72D /* DateAndTimeCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateAndTimeCell.swift; sourceTree = "<group>"; };
-		A233851324A1EA0D00F265E8 /* ReceiveTestViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReceiveTestViewController.swift; sourceTree = "<group>"; };
 		A2545B6C240635CB00C312FE /* varmeets.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = varmeets.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A2545B6F240635CB00C312FE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		A2545B71240635CB00C312FE /* HomeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewController.swift; sourceTree = "<group>"; };
@@ -85,7 +83,6 @@
 		A2545B91240635CD00C312FE /* varmeetsUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = varmeetsUITests.swift; sourceTree = "<group>"; };
 		A2545B93240635CD00C312FE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A255A88E248F53D5006376AC /* Map.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Map.swift; sourceTree = "<group>"; };
-		A26C1D8B24A0CDD500909F5C /* PlanCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanCell.swift; sourceTree = "<group>"; };
 		A298E63D248A369D00A39E8C /* FriendProfileViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendProfileViewController.swift; sourceTree = "<group>"; };
 		A29A8F1B24872646003D4DC7 /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
 		A2CB97C3248479660096F85B /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
@@ -95,6 +92,7 @@
 		A2D29884243FD2EF00B482CE /* Fav_75px.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Fav_75px.png; path = img/Fav_75px.png; sourceTree = SOURCE_ROOT; };
 		A2E69127244038AF00422E92 /* FriendsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsViewController.swift; sourceTree = "<group>"; };
 		A2E6912924403C6000422E92 /* FavViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavViewController.swift; sourceTree = "<group>"; };
+		A2ED060724B30B7E0025B703 /* PlanDetailsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanDetailsViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -151,7 +149,7 @@
 				A2FE07CC2436FCD200805A8B /* varmeetsImages */,
 				A2545B6F240635CB00C312FE /* AppDelegate.swift */,
 				A2545B71240635CB00C312FE /* HomeViewController.swift */,
-				A26C1D8B24A0CDD500909F5C /* PlanCell.swift */,
+				A2ED060724B30B7E0025B703 /* PlanDetailsViewController.swift */,
 				A2545B73240635CB00C312FE /* MapViewController.swift */,
 				A255A88E248F53D5006376AC /* Map.swift */,
 				A2E69127244038AF00422E92 /* FriendsViewController.swift */,
@@ -160,7 +158,6 @@
 				A2E6912924403C6000422E92 /* FavViewController.swift */,
 				A2CFD71C246E2C3200ED618A /* AddPlanViewController.swift */,
 				A2215FC624983C68001EE72D /* DateAndTimeCell.swift */,
-				A233851324A1EA0D00F265E8 /* ReceiveTestViewController.swift */,
 				A2545B78240635CD00C312FE /* Assets.xcassets */,
 				A2545B75240635CB00C312FE /* Main.storyboard */,
 				A2545B7A240635CD00C312FE /* LaunchScreen.storyboard */,
@@ -357,13 +354,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A233851424A1EA0D00F265E8 /* ReceiveTestViewController.swift in Sources */,
+				A2ED060824B30B7E0025B703 /* PlanDetailsViewController.swift in Sources */,
 				A255A88F248F53D5006376AC /* Map.swift in Sources */,
 				A2E69128244038AF00422E92 /* FriendsViewController.swift in Sources */,
 				A2215FC724983C68001EE72D /* DateAndTimeCell.swift in Sources */,
 				A2000524248B09CB00F1F977 /* ReFriendsViewController.swift in Sources */,
 				A2545B74240635CB00C312FE /* MapViewController.swift in Sources */,
-				A26C1D8C24A0CDD500909F5C /* PlanCell.swift in Sources */,
 				A2545B70240635CB00C312FE /* AppDelegate.swift in Sources */,
 				A298E63E248A369D00A39E8C /* FriendProfileViewController.swift in Sources */,
 				A2E6912A24403C6100422E92 /* FavViewController.swift in Sources */,
