@@ -110,6 +110,10 @@ class HomeViewController: UIViewController, /*UISearchBarDelegate,*/ UITableView
         }
     }
     
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true) // セルの選択を解除
+    }
+    
     /*
     func searchBarSearchButtonClicked(_ searchBar:UISearchBar) {
         print("検索ボタンがタップ")
@@ -119,5 +123,20 @@ class HomeViewController: UIViewController, /*UISearchBarDelegate,*/ UITableView
         print("キャンセルボタンがタップ")
     }
     */
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        // Get the new view controller using segue.destination.
+        // Pass the selected object to the new view controller.
+        
+        guard let identifier = segue.identifier else {
+            return
+        }
+        if identifier == "toPlanDetails" {
+            let PlanDetailsVC = segue.destination as! PlanDetailsViewController
+            PlanDetailsVC.DateAndTime = self.DateAndTimes[(self.PlanTable.indexPathForSelectedRow?.row)!]
+            PlanDetailsVC.PlanTitle = self.PlanTitles[(self.PlanTable.indexPathForSelectedRow?.row)!]
+        }
+    }
+    
 }
 

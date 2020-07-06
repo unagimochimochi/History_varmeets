@@ -61,12 +61,12 @@ class ReFriendsViewController: UIViewController, UITableViewDataSource, UITableV
     }
     
     // Cell が選択された場合
-    func tableView(_ table: UITableView,didSelectRowAt indexPath: IndexPath) {
+    func tableView(_ table: UITableView, didSelectRowAt indexPath: IndexPath) {
+        table.deselectRow(at: indexPath, animated: true) // セルの選択を解除
         // [indexPath.row] から画像名を探し、UImage を設定
         selectedImage = UIImage(named: imgArray[indexPath.row] as! String)
         if selectedImage != nil {
-            // SubViewController へ遷移するために Segue を呼び出す
-            performSegue(withIdentifier: "toFriendProfileViewController",sender: nil)
+            performSegue(withIdentifier: "toFriendProfileViewController", sender: nil)
         }
         giveName = label1Array[indexPath.item] as! String
         
