@@ -13,9 +13,12 @@ var saveDateAndTime = [String]() // datePickerで取得した日時を保存す�
 
 class AddPlanViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
+    var PlanTitle: String?
     var DateAndTime: String?
 
     @IBOutlet weak var addPlanTable: UITableView!
+    
+    @IBOutlet weak var PlanTitleTextField: UITextField!
     
     // キャンセルボタン
     @IBAction func cancelButton(_ sender: Any) {
@@ -76,6 +79,7 @@ class AddPlanViewController: UIViewController, UITableViewDelegate, UITableViewD
             return
         }
         let indexPath = IndexPath(row: 0, section: 0)
+        self.PlanTitle = self.PlanTitleTextField.text ?? ""
         self.DateAndTime = (addPlanTable.cellForRow(at: indexPath) as? DateAndTimeCell)?.displayDateAndTimeTextField.text ?? ""
     }
 }
