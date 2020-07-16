@@ -8,19 +8,23 @@
 import UIKit
 
 class PlanDetailsViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
-
+    
     let planItem = ["参加者","場所","共有開始","通知"]
     
     var PlanTitle: String?
     var DateAndTime: String?
-
-    @IBOutlet weak var PlanDetailsTableView: UITableView!
+    
+    // @IBOutlet weak var PlanDetailsTableView: UITableView!
     @IBOutlet weak var DateAndTimeLabel: UILabel!
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         if let DateAndTime = self.DateAndTime {
             DateAndTimeLabel.text = DateAndTime
+        }
+        
+        if let PlanTitle = self.PlanTitle {
             self.navigationItem.title = PlanTitle
         }
     }
@@ -45,11 +49,18 @@ class PlanDetailsViewController: UIViewController, UITableViewDelegate, UITableV
         return 68.0
     }
     
-    /*
+    
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
+        
+        guard let identifier = segue.identifier else {
+            return
+        }
+        
+        if identifier == "editPlan" {
+            let AddPlanVC = segue.destination as! AddPlanViewController
+            AddPlanVC.PlanTitle = self.PlanTitle
+            AddPlanVC.DateAndTime = self.DateAndTime
+        }
     }
-    */
-
+    
 }
