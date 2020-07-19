@@ -77,6 +77,14 @@ class HomeViewController: UIViewController, /*UISearchBarDelegate,*/ UITableView
          */
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        print(#function)
+
+        if let indexPath = PlanTable.indexPathForSelectedRow {
+            PlanTable.deselectRow(at: indexPath, animated: true)
+        }
+    }
     
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
@@ -129,7 +137,7 @@ class HomeViewController: UIViewController, /*UISearchBarDelegate,*/ UITableView
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        tableView.deselectRow(at: indexPath, animated: true) // セルの選択を解除
+        // tableView.deselectRow(at: indexPath, animated: true) // セルの選択を解除
     }
     
     /*

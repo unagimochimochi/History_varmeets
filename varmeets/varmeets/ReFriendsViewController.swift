@@ -13,27 +13,22 @@ class ReFriendsViewController: UIViewController, UITableViewDataSource, UITableV
     @IBOutlet var table: UITableView!
     
     var selectedImage: UIImage?
-    // 遷移先のViewControllerに渡す変数
     var giveName: String = ""
     
     // section毎の画像配列
     let imgArray: NSArray = ["Toshihiro","Yuka"]
     
-    let label1Array: NSArray = ["利洋","優香"]
-    let label2Array: NSArray = ["@toshihiro_sanada","@yuyuyuyuyukakka"]
+    let label1Array: [String] = ["利洋","優香"]
+    let label2Array: [String] = ["@toshihiro_sanada","@yuyuyuyuyukakka"]
     
     override func viewDidLoad() {
-        super.viewDidLoad()
-        
-        self.navigationItem.title = "友だち"        
+        super.viewDidLoad()        
     }
     
-    // Table Viewのセルの数を指定
     func tableView(_ table: UITableView, numberOfRowsInSection section: Int) -> Int {
         return imgArray.count
     }
     
-    // 各セルの要素を設定する
     func tableView(_ table: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         // tableCell の ID で UITableViewCell のインスタンスを生成
@@ -60,25 +55,24 @@ class ReFriendsViewController: UIViewController, UITableViewDataSource, UITableV
         return 60.0
     }
     
-    // Cell が選択された場合
     func tableView(_ table: UITableView, didSelectRowAt indexPath: IndexPath) {
-        table.deselectRow(at: indexPath, animated: true) // セルの選択を解除
+        table.deselectRow(at: indexPath, animated: true)
         // [indexPath.row] から画像名を探し、UImage を設定
         selectedImage = UIImage(named: imgArray[indexPath.row] as! String)
+        self.giveName = self.label1Array[indexPath.item] // ここに移動したら解決！
         if selectedImage != nil {
             performSegue(withIdentifier: "toFriendProfileViewController", sender: nil)
         }
-        giveName = label1Array[indexPath.item] as! String
-        
     }
     
-    // Segue 準備
-    override func prepare(for segue: UIStoryboardSegue, sender: Any!) {
-        if (segue.identifier == "toFriendProfileViewController") {
-            let fpVC: FriendProfileViewController = (segue.destination as? FriendProfileViewController)!
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        
+        if segue.identifier == "toFriendProfileViewController" {
+            let fpVC = segue.destination as! FriendProfileViewController
             // SubViewController のselectedImgに選択された画像を設定する
             fpVC.selectedImg = selectedImage
             fpVC.receiveData = giveName
         }
     }
+
 }

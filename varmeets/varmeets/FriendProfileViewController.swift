@@ -24,6 +24,6 @@ class FriendProfileViewController: UIViewController{
         
         name.text = receiveData
         
-        self.navigationItem.title = "友だち"
+        self.navigationItem.title = receiveData
     }
 }
