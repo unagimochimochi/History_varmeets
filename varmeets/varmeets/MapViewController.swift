@@ -4,46 +4,72 @@
 //
 //  Created by 持田侑菜 on 2020/02/26.
 //  https://developer.apple.com/documentation/corelocation/
+//  https://qiita.com/yuta-sasaki/items/3151b3faf2303fe78312
 //
 
 import UIKit
 import CoreLocation
 import MapKit
 
-class MapViewController: UIViewController, CLLocationManagerDelegate, UITextFieldDelegate {
+class MapViewController: UIViewController, CLLocationManagerDelegate, UIGestureRecognizerDelegate, UITextFieldDelegate {
     
     @IBOutlet weak var textField: UITextField!
     @IBOutlet weak var mapView: MKMapView!
-    var locationManager: CLLocationManager!
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
-        
-        setupLocationManager()
-        
-        textField.delegate = self
-        
-        // キーボード以外をtapした際のアクションをviewに仕込む
-        let hideTap : UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(hideKyeoboard))
-        self.view.addGestureRecognizer(hideTap)
-        
-        // locationManager = CLLocationManager()  // 変数を初期化
-        // guard let locationManager = locationManager else { return }
-        // locationManager.delegate = self  // delegateとしてself(自インスタンス)を設定
-        
-        // locationManager.startUpdatingLocation()  // 位置情報更新を指示
-        // locationManager.requestWhenInUseAuthorization()  // 位置情報取得の許可を得る
-        
-        mapView.showsUserLocation = true // 位置を地図に表示
-        
-        self.navigationItem.title = "地図" // タイトル文字列の設定
+    /* トラッキングモード 多少不具合あり
+     let ImageHeadingUp :UIImage? = UIImage(named:"HeadingupButton")
+     let ImageNorthUp :UIImage? = UIImage(named:"NorthupButton")
+     @IBOutlet var trackingButton: UIButton!
+     @IBAction func trackingBtnTouchDown(_ sender: AnyObject) {
+     switch mapView.userTrackingMode {
+     
+     case .follow :
+     mapView.userTrackingMode = .followWithHeading
+     trackingButton.setImage(ImageHeadingUp, for: .normal)
+     break
+     
+     case .followWithHeading :
+     mapView.userTrackingMode = .none
+     trackingButton.setImage(ImageHeadingUp, for: .normal)
+     break
+     
+     default:
+     mapView.userTrackingMode = .follow
+     trackingButton.setImage(ImageNorthUp, for: .normal)
+     break
+     }
+     }
+     */
+    
+    @IBOutlet var longPressGesRec: UILongPressGestureRecognizer!
+    // UILongPressGestureRecognizerのdelegate：ロングタップを検出する
+    @IBAction func mapViewDidLongPress(_ sender: UILongPressGestureRecognizer) {
+        // ロングタップ開始
+        if sender.state == .began {
+        }
+        // ロングタップ終了（手を離した）
+        else if sender.state == .ended {
+            // タップした位置(CGPoint)を指定してMKMapView上の緯度経度を取得する
+            let tapPoint = sender.location(in: view)
+            let center = mapView.convert(tapPoint, toCoordinateFrom: mapView)
+            
+            let lonStr = center.longitude.description
+            let latStr = center.latitude.description
+            print("lon: " + lonStr)
+            print("lat: " + latStr)
+            
+            let distance = calcDistance(mapView.userLocation.coordinate, center)
+            print("distance: " + distance.description)
+        }
     }
     
+    var locationManager: CLLocationManager!
+    
+    // ？？？
     func setupLocationManager() {
         locationManager = CLLocationManager()
-        guard let locationManager = locationManager else { return }
-        
+        guard let locationManager = locationManager else {
+            return
+        }
         locationManager.requestWhenInUseAuthorization()
         
         let status = CLLocationManager.authorizationStatus()
@@ -54,6 +80,45 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, UITextFiel
         }
     }
     
+    // 地図の初期化関数
+    func initMap() {
+        var region: MKCoordinateRegion = mapView.region
+        region.span.latitudeDelta = 0.02
+        region.span.longitudeDelta = 0.02
+        mapView.setRegion(region, animated: true)
+        
+        mapView.showsUserLocation = true // 現在位置表示の有効化
+        mapView.userTrackingMode = .follow // 現在位置のみ更新する
+    }
+    
+    // 地図の中心位置の更新関数
+    func updateCurrentPos(_ coordinate:CLLocationCoordinate2D) {
+        var region:MKCoordinateRegion = mapView.region
+        region.center = coordinate
+        mapView.setRegion(region,animated:true)
+    }
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        // Do any additional setup after loading the view, typically from a nib.
+        
+        setupLocationManager()
+        initMap()
+        
+        textField.delegate = self
+        
+        // キーボード以外をtapした際のアクションをviewに仕込む
+        let hideTap : UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(hideKyeoboard))
+        self.view.addGestureRecognizer(hideTap)
+        
+        // delegateを登録する
+        locationManager = CLLocationManager()
+        guard let locationManager = locationManager else {
+            return
+        }
+        locationManager.delegate = self
+    }
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
     }
@@ -62,22 +127,27 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, UITextFiel
         self.view.endEditing(true)
     }
     
-    // 位置情報更新時に呼び出される処理
+    // 位置情報更新時に地図の中心位置の変更関数を呼び出す
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations:[CLLocation]) {
-        let longitude = (locations.last?.coordinate.longitude.description)!
-        let latitude = (locations.last?.coordinate.latitude.description)!
-        print("[DBG]longitude : " + longitude)
-        print("[DBG]latitude : " + latitude)
-                
-        mapView.setCenter((locations.last?.coordinate)!, animated: true) // 現在地を中心に表示
         
-        if let coordinate = locations.last?.coordinate {
-            // 現在地を拡大して表示する
-            let span = MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
-            let region = MKCoordinateRegion(center: coordinate, span: span)
-            mapView.region = region
+        switch mapView.userTrackingMode {
+        case .followWithHeading:
+            mapView.userTrackingMode = .followWithHeading
+            break
+        case .follow:
+            mapView.userTrackingMode = .follow
+            break
+        default:
+            break
         }
- 
+    }
+    
+    // 2点間の距離(m)を算出する
+    func calcDistance(_ a: CLLocationCoordinate2D, _ b: CLLocationCoordinate2D) -> CLLocationDistance {
+        let aLoc: CLLocation = CLLocation(latitude: a.latitude, longitude: a.longitude)
+        let bLoc: CLLocation = CLLocation(latitude: b.latitude, longitude: b.longitude)
+        let dist = bLoc.distance(from: aLoc)
+        return dist
     }
     /// キーボードの検索ボタン押下時
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
@@ -98,8 +168,7 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, UITextFiel
             // 地図の中心を設定
             mapView?.setCenter(loc ,animated:true)
             // 縮尺を設定
-            let region = MKCoordinateRegion(center: loc,
-                                            span: MKCoordinateSpan(latitudeDelta: 0.02, longitudeDelta: 0.02))
+            let region = MKCoordinateRegion(center: loc, span: MKCoordinateSpan(latitudeDelta: 0.02, longitudeDelta: 0.02))
             
             Map.search(query: "駅", region: region) { (result) in // queryに"駅"と入れると検索地周辺の駅を検索
                 switch result {
@@ -127,6 +196,6 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, UITextFiel
         
         return true
     }
-
+    
 }
 
