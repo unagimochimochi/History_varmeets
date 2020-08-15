@@ -56,24 +56,6 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, UIGestureR
         }
     }
     
-    // 位置情報取得の許可を得る
-    func setupLocationManager() {
-        locationManager = CLLocationManager()
-        guard let locationManager = locationManager else {
-            return
-        }
-        // locationManager.requestWhenInUseAuthorization()
-        locationManager.requestAlwaysAuthorization()
-        
-        let status = CLLocationManager.authorizationStatus()
-        // if status == .authorizedWhenInUse {
-        if status == .authorizedAlways {
-            locationManager.delegate = self
-            locationManager.distanceFilter = 10
-            locationManager.startUpdatingLocation()
-        }
-    }
-    
     // 地図の初期化関数
     func initMap() {
         var region: MKCoordinateRegion = mapView.region
@@ -86,7 +68,7 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, UIGestureR
     }
     
     // 地図の中心位置の更新関数
-    func updateCurrentPos(_ coordinate:CLLocationCoordinate2D) {
+    func updateCurrentPos(_ coordinate: CLLocationCoordinate2D) {
         var region: MKCoordinateRegion = mapView.region
         region.center = coordinate
         mapView.setRegion(region,animated:true)
@@ -96,7 +78,16 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, UIGestureR
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
-        setupLocationManager()
+        // delegateを登録する
+        locationManager = CLLocationManager()
+        guard let locationManager = locationManager else {
+            return
+        }
+        locationManager.delegate = self
+        
+        // 位置情報取得の許可を得る
+        locationManager.requestWhenInUseAuthorization()
+        
         initMap()
         
         textField.delegate = self
@@ -104,13 +95,6 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, UIGestureR
         // キーボード以外をtapした際のアクションをviewに仕込む
         let hideTap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(hideKyeoboard))
         self.view.addGestureRecognizer(hideTap)
-        
-        // delegateを登録する
-        locationManager = CLLocationManager()
-        guard let locationManager = locationManager else {
-            return
-        }
-        locationManager.delegate = self
     }
     
     override func didReceiveMemoryWarning() {
@@ -155,6 +139,15 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, UIGestureR
         default:
             break
         }
+        // locations.last!.speed で秒速を取得
+        // 秒速を少数第2位の時速に変換
+        let speed: Double = floor((locations.last!.speed * 3.6)*100)/100
+        print(speed)
+        /*
+         self.avgSumSpeed += locations.last!.speed
+         self.avgSumCount += 1
+         let tmpAvgSpeed = floor(((self.avgSumSpeed / Double(self.avgSumCount)) * 3.6)*100)/100
+         */
     }
     
     // キーボードの検索ボタン押下時
@@ -174,7 +167,7 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, UIGestureR
             }
             
             // 地図の中心を設定
-            mapView?.setCenter(loc, animated:true)
+            mapView?.setCenter(loc, animated: true)
             // 縮尺を設定
             let region = MKCoordinateRegion(center: loc, span: MKCoordinateSpan(latitudeDelta: 0.02, longitudeDelta: 0.02))
             
