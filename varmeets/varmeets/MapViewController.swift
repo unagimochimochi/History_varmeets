@@ -17,6 +17,7 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, UIGestureR
     @IBOutlet weak var mapView: MKMapView!
     var locationManager: CLLocationManager!
     var pointAno: MKPointAnnotation = MKPointAnnotation()
+    let geocoder = CLGeocoder()
     
     @IBOutlet var longPressGesRec: UILongPressGestureRecognizer!
     // UILongPressGestureRecognizerのdelegate：ロングタップを検出する
@@ -37,18 +38,17 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, UIGestureR
             print("lon: " + lonStr)
             print("lat: " + latStr)
             
+            // 緯度と経度をString型からDouble型に変換
+            let lonNum = Double(lonStr)!
+            let latNum = Double(latStr)!
+            
+            let location = CLLocation(latitude: latNum, longitude: lonNum)
+            
+            // 緯度と経度から住所を取得（逆ジオコーディング）
+            geocoder.reverseGeocodeLocation(location, preferredLocale: nil, completionHandler: GeocodeCompHandler(placemarks:error:))
+            
             let distance = calcDistance(mapView.userLocation.coordinate, center)
             print("distance: " + distance.description)
-            
-            // ピンに表示する文字列を生成する
-            var str: String = Int(distance).description
-            str = str + " m"
-            
-            if pointAno.title != str {
-                // ピンまでの距離に変化があればtitleを更新する
-                pointAno.title = str
-                mapView.addAnnotation(pointAno)
-            }
             
             // ロングタップを検出した位置にピンを立てる
             pointAno.coordinate = center
@@ -115,30 +115,6 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, UIGestureR
     
     // 位置情報更新時に地図の中心位置の変更関数を呼び出す
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations:[CLLocation]) {
-        
-        let distance = calcDistance(mapView.userLocation.coordinate, pointAno.coordinate)
-        if (0 != distance) {
-            // ピンに設定する文字列を生成する
-            var str: String = Int(distance).description
-            str = str + " m"
-            
-            if pointAno.title != str {
-                // ピンまでの距離に変化があればtitleを更新する
-                pointAno.title = str
-                mapView.addAnnotation(pointAno)
-            }
-        }
-        
-        switch mapView.userTrackingMode {
-        case .followWithHeading:
-            mapView.userTrackingMode = .followWithHeading
-            break
-        case .follow:
-            mapView.userTrackingMode = .follow
-            break
-        default:
-            break
-        }
         // locations.last!.speed で秒速を取得
         // 秒速を少数第2位の時速に変換
         let speed: Double = floor((locations.last!.speed * 3.6)*100)/100
@@ -148,6 +124,20 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, UIGestureR
          self.avgSumCount += 1
          let tmpAvgSpeed = floor(((self.avgSumSpeed / Double(self.avgSumCount)) * 3.6)*100)/100
          */
+    }
+    
+    // reverseGeocodeLocation(_:preferredLocale:completionHandler:)の第3引数
+    func GeocodeCompHandler(placemarks: [CLPlacemark]?, error: Error?) {
+        guard let placemark = placemarks?.first, error == nil,
+            let administrativeArea = placemark.administrativeArea, //県
+            let locality = placemark.locality, // 市区町村
+            let throughfare = placemark.thoroughfare, // 丁目を含む地名
+            let subThoroughfare = placemark.subThoroughfare // 番地
+            else {
+                return
+        }
+        print(administrativeArea + locality + throughfare + subThoroughfare)
+        self.pointAno.title = administrativeArea + locality + throughfare + subThoroughfare
     }
     
     // キーボードの検索ボタン押下時
