@@ -11,7 +11,7 @@ import UIKit
 import CoreLocation
 import MapKit
 
-class MapViewController: UIViewController, CLLocationManagerDelegate, UIGestureRecognizerDelegate, UITextFieldDelegate {
+class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDelegate, UIGestureRecognizerDelegate, UITextFieldDelegate {
     
     @IBOutlet weak var textField: UITextField!
     @IBOutlet weak var mapView: MKMapView!
@@ -20,15 +20,43 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, UIGestureR
     let geocoder = CLGeocoder()
     
     @IBOutlet var longPressGesRec: UILongPressGestureRecognizer!
-    // UILongPressGestureRecognizerのdelegate：ロングタップを検出する
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        // Do any additional setup after loading the view, typically from a nib.
+        
+        // delegateを登録する
+        locationManager = CLLocationManager()
+        guard let locationManager = locationManager else {
+            return
+        }
+        locationManager.delegate = self
+        
+        mapView.delegate = self
+        
+        // 位置情報取得の許可を得る
+        locationManager.requestWhenInUseAuthorization()
+        
+        initMap()
+        
+        textField.delegate = self
+        
+        // キーボード以外をtapした際のアクションをviewに仕込む
+        let hideTap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(hideKyeoboard))
+        self.view.addGestureRecognizer(hideTap)
+    }
+    
+    // ロングタップを検出する
     @IBAction func mapViewDidLongPress(_ sender: UILongPressGestureRecognizer) {
         // ロングタップ開始
         if sender.state == .began {
+            print("ロングタップ開始")
             // ロングタップ開始時に古いピンを削除する
             mapView.removeAnnotation(pointAno)
         }
         // ロングタップ終了（手を離した）
         else if sender.state == .ended {
+            print("ロングタップ終了")
             // タップした位置(CGPoint)を指定してMKMapView上の緯度経度を取得する
             let tapPoint = sender.location(in: view)
             let center = mapView.convert(tapPoint, toCoordinateFrom: mapView)
@@ -53,6 +81,8 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, UIGestureR
             // ロングタップを検出した位置にピンを立てる
             pointAno.coordinate = center
             mapView.addAnnotation(pointAno)
+            // ピンを最初から選択状態にする
+            mapView.selectAnnotation(pointAno, animated: true)
         }
     }
     
@@ -73,30 +103,7 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, UIGestureR
         region.center = coordinate
         mapView.setRegion(region,animated:true)
     }
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
         
-        // delegateを登録する
-        locationManager = CLLocationManager()
-        guard let locationManager = locationManager else {
-            return
-        }
-        locationManager.delegate = self
-        
-        // 位置情報取得の許可を得る
-        locationManager.requestWhenInUseAuthorization()
-        
-        initMap()
-        
-        textField.delegate = self
-        
-        // キーボード以外をtapした際のアクションをviewに仕込む
-        let hideTap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(hideKyeoboard))
-        self.view.addGestureRecognizer(hideTap)
-    }
-    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
     }
@@ -138,6 +145,34 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, UIGestureR
         }
         print(administrativeArea + locality + throughfare + subThoroughfare)
         self.pointAno.title = administrativeArea + locality + throughfare + subThoroughfare
+    }
+    
+    // ピンの詳細設定
+    func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
+        // 現在地にはピンを立てない
+        if annotation is MKUserLocation {
+            return nil
+        }
+        
+        let anoView = MKPinAnnotationView(annotation: pointAno, reuseIdentifier: nil)
+        
+        // 吹き出しを表示
+        anoView.canShowCallout = true
+        
+        // 吹き出し内の予定を追加ボタン
+        let addPlanButton = UIButton()
+        addPlanButton.frame = CGRect(x: 0, y: 0, width: 85, height: 36)
+        addPlanButton.setTitle("予定を追加", for: .normal)
+        addPlanButton.setTitleColor(.white, for: .normal)
+        addPlanButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 15.0)
+        addPlanButton.layer.backgroundColor = UIColor.orange.cgColor
+        addPlanButton.layer.masksToBounds = true
+        addPlanButton.layer.cornerRadius = 8
+        
+        // 吹き出しの右側にボタンをセット
+        anoView.rightCalloutAccessoryView = addPlanButton
+        
+        return anoView
     }
     
     // キーボードの検索ボタン押下時
