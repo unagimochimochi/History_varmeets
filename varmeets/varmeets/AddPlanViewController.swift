@@ -13,6 +13,9 @@ class AddPlanViewController: UIViewController, UITableViewDelegate, UITableViewD
     
     var PlanTitle: String?
     var DateAndTime: String!
+    var address: String = ""
+    var lon: String = ""
+    var lat: String = ""
     
     @IBOutlet weak var addPlanTable: UITableView!
     
@@ -44,6 +47,15 @@ class AddPlanViewController: UIViewController, UITableViewDelegate, UITableViewD
             let cell = tableView.dequeueReusableCell(withIdentifier: "DateAndTimeCell", for:indexPath) as! DateAndTimeCell
             cell.textLabel?.text = planItem[indexPath.row]
             cell.displayDateAndTimeTextField.text = DateAndTime
+            return cell
+        } else if indexPath.row == 1 {
+            let cell = tableView.dequeueReusableCell(withIdentifier: "ParticipantCell", for:indexPath) // as UITableViewCell
+            cell.textLabel?.text = planItem[indexPath.row]
+            return cell
+        } else if indexPath.row == 2 {
+            let cell = tableView.dequeueReusableCell(withIdentifier: "PlaceCell", for:indexPath) as! PlaceCell
+            cell.textLabel?.text = planItem[indexPath.row]
+            cell.displayPlaceTextField.text = address
             return cell
         } else {
             let cell = tableView.dequeueReusableCell(withIdentifier: "ParticipantCell", for:indexPath) // as UITableViewCell

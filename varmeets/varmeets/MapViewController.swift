@@ -19,6 +19,9 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     var pointAno: MKPointAnnotation = MKPointAnnotation()
     let geocoder = CLGeocoder()
     
+    var lon: String = ""
+    var lat: String = ""
+    
     @IBOutlet var longPressGesRec: UILongPressGestureRecognizer!
     
     override func viewDidLoad() {
@@ -65,6 +68,10 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
             let latStr = center.latitude.description
             print("lon: " + lonStr)
             print("lat: " + latStr)
+            
+            // 変数にタップした位置の緯度と経度をセット
+            lon = lonStr
+            lat = latStr
             
             // 緯度と経度をString型からDouble型に変換
             let lonNum = Double(lonStr)!
@@ -173,6 +180,27 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
         anoView.rightCalloutAccessoryView = addPlanButton
         
         return anoView
+    }
+    
+    // 吹き出しアクセサリー押下時
+    func mapView(_ mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
+        // 右側のボタンでAddPlanVCに遷移
+        if control == view.rightCalloutAccessoryView {
+            self.performSegue(withIdentifier: "toAddPlanVC", sender: nil)
+        }
+    }
+    
+    // 遷移時に住所と緯度と経度を渡す
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        guard let identifier = segue.identifier else {
+            return
+        }
+        if identifier == "toAddPlanVC" {
+            let addPlanVC = segue.destination as! AddPlanViewController
+            addPlanVC.address = self.pointAno.title ?? ""
+            addPlanVC.lon = self.lon
+            addPlanVC.lat = self.lat
+        }
     }
     
     // キーボードの検索ボタン押下時
