@@ -11,79 +11,99 @@ class HomeViewController: UIViewController, UITableViewDelegate, UITableViewData
     
     let userDefaults = UserDefaults.standard
     
-    @IBOutlet weak var PlanTable: UITableView!
-    var DateAndTimes = [String]()
-    var PlanTitles = [String]()
-    // var ParticipantImgs = [UIImage]()
-    var ParticipantNames = [String]()
-    var Places = [String]()
+    @IBOutlet weak var planTable: UITableView!
+    var dateAndTimes = [String]()
+    var planTitles = [String]()
+    // var participantImgs = [UIImage]()
+    var participantNames = [String]()
+    var places = [String]()
+    var lons = [String]()
+    var lats = [String]()
     
     @IBAction func unwindtoHomeVC(sender: UIStoryboardSegue) {
-        
-        guard let sourceVC1 = sender.source as? AddPlanViewController, let DateAndTime = sourceVC1.DateAndTime else {
+        // 日時
+        guard let sourceVC1 = sender.source as? AddPlanViewController, let dateAndTime = sourceVC1.DateAndTime else {
             return
         }
-        if let selectedIndexPath = self.PlanTable.indexPathForSelectedRow {
-            self.DateAndTimes[selectedIndexPath.row] = DateAndTime
+        if let selectedIndexPath = self.planTable.indexPathForSelectedRow {
+            self.dateAndTimes[selectedIndexPath.row] = dateAndTime
         } else {
-            self.DateAndTimes.append(DateAndTime)
+            self.dateAndTimes.append(dateAndTime)
         }
-        self.userDefaults.set(self.DateAndTimes, forKey: "DateAndTimes")
+        self.userDefaults.set(self.dateAndTimes, forKey: "DateAndTimes")
         
-        guard let sourceVC2 = sender.source as? AddPlanViewController, let PlanTitle = sourceVC2.PlanTitle else {
+        // 予定タイトル
+        guard let sourceVC2 = sender.source as? AddPlanViewController, let planTitle = sourceVC2.PlanTitle else {
             return
         }
-        if let selectedIndexPath = self.PlanTable.indexPathForSelectedRow {
-            self.PlanTitles[selectedIndexPath.row] = PlanTitle
+        if let selectedIndexPath = self.planTable.indexPathForSelectedRow {
+            self.planTitles[selectedIndexPath.row] = planTitle
         } else {
-            self.PlanTitles.append(PlanTitle)
+            self.planTitles.append(planTitle)
         }
-        self.userDefaults.set(self.PlanTitles, forKey: "PlanTitles")
+        self.userDefaults.set(self.planTitles, forKey: "PlanTitles")
         
-        guard let sourceVC4 = sender.source as? AddPlanViewController, let Place = sourceVC4.address else {
+        // 場所
+        guard let sourceVC4 = sender.source as? AddPlanViewController, let place = sourceVC4.address else {
             return
         }
-        if let selectedIndexPath = self.PlanTable.indexPathForSelectedRow {
-            self.Places[selectedIndexPath.row] = Place
+        let lon = sourceVC4.lon
+        let lat = sourceVC4.lat
+        if let selectedIndexPath = self.planTable.indexPathForSelectedRow {
+            self.places[selectedIndexPath.row] = place
+            self.lons[selectedIndexPath.row] = lon
+            self.lats[selectedIndexPath.row] = lat
         } else {
-            self.Places.append(Place)
+            self.places.append(place)
+            self.lons.append(lon)
+            self.lats.append(lat)
         }
-        self.userDefaults.set(self.Places, forKey: "Places")
+        self.userDefaults.set(self.places, forKey: "Places")
+        self.userDefaults.set(self.lons, forKey: "lons")
+        self.userDefaults.set(self.lats, forKey: "lats")
         
-        self.PlanTable.reloadData()
+        self.planTable.reloadData()
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         if self.userDefaults.object(forKey: "DateAndTimes") != nil {
-            self.DateAndTimes = self.userDefaults.stringArray(forKey: "DateAndTimes")!
+            self.dateAndTimes = self.userDefaults.stringArray(forKey: "DateAndTimes")!
         } else {
-            self.DateAndTimes = ["日時"]
+            self.dateAndTimes = ["日時"]
         }
         
         if self.userDefaults.object(forKey: "PlanTitles") != nil {
-            self.PlanTitles = self.userDefaults.stringArray(forKey: "PlanTitles")!
+            self.planTitles = self.userDefaults.stringArray(forKey: "PlanTitles")!
         } else {
-            self.PlanTitles = ["予定サンプル"]
+            self.planTitles = ["予定サンプル"]
         }
         
         if self.userDefaults.object(forKey: "Places") != nil {
-            self.Places = self.userDefaults.stringArray(forKey: "Places")!
+            self.places = self.userDefaults.stringArray(forKey: "Places")!
         } else {
-            self.Places = ["場所"]
+            self.places = ["場所"]
         }
         
-        // self.ParticipantImgs = ["FriendsNoimg"]
-        self.ParticipantNames = ["参加者"]
+        if self.userDefaults.object(forKey: "lons") != nil {
+            self.lons = self.userDefaults.stringArray(forKey: "lons")!
+            self.lats = self.userDefaults.stringArray(forKey: "lats")!
+        } else {
+            self.lons = ["経度"]
+            self.lats = ["緯度"]
+        }
+        
+        // self.participantImgs = ["FriendsNoimg"]
+        self.participantNames = ["参加者"]
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         // print(#function)
 
-        if let indexPath = PlanTable.indexPathForSelectedRow {
-            PlanTable.deselectRow(at: indexPath, animated: true)
+        if let indexPath = planTable.indexPathForSelectedRow {
+            planTable.deselectRow(at: indexPath, animated: true)
         }
     }
     
@@ -100,41 +120,42 @@ class HomeViewController: UIViewController, UITableViewDelegate, UITableViewData
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         let cell = tableView.dequeueReusableCell(withIdentifier: "PlanCell", for: indexPath)
-        // let img = UIImage(named: ParticipantImgs[indexPath.row] as! String)
+        // let img = UIImage(named: participantImgs[indexPath.row] as! String)
         
         let DateAndTimeLabel = cell.viewWithTag(1) as! UILabel
-        DateAndTimeLabel.text = self.DateAndTimes[indexPath.row]
+        DateAndTimeLabel.text = self.dateAndTimes[indexPath.row]
         
         let PlanTitleLabel = cell.viewWithTag(2) as! UILabel
-        PlanTitleLabel.text = self.PlanTitles[indexPath.row]
+        PlanTitleLabel.text = self.planTitles[indexPath.row]
         /*
-         // let ParticipantImageView = cell.viewWithTag(3) as! UIImageView
-         // ParticipantImageView.image = img
+         // let participantImageView = cell.viewWithTag(3) as! UIImageView
+         // participantImageView.image = img
          
-         let ParticipantLabel = cell.viewWithTag(4) as! UILabel
-         ParticipantLabel.text = self.ParticipantNames[indexPath.row]
+         let participantLabel = cell.viewWithTag(4) as! UILabel
+         participantLabel.text = self.participantNames[indexPath.row]
          */
         let placeLabel = cell.viewWithTag(5) as! UILabel
-        placeLabel.text = self.Places[indexPath.row]
+        placeLabel.text = self.places[indexPath.row]
+        print("経度: \(self.lons[indexPath.row]), 緯度: \(self.lats[indexPath.row])")
         
         return cell
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return DateAndTimes.count
+        return dateAndTimes.count
     }
     
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             // Delete the row from the data source
-            self.DateAndTimes.remove(at: indexPath.row)
-            self.userDefaults.set(self.DateAndTimes, forKey: "DateAndTimes")
+            self.dateAndTimes.remove(at: indexPath.row)
+            self.userDefaults.set(self.dateAndTimes, forKey: "DateAndTimes")
             
-            self.PlanTitles.remove(at: indexPath.row)
-            self.userDefaults.set(self.PlanTitles, forKey: "PlanTitles")
+            self.planTitles.remove(at: indexPath.row)
+            self.userDefaults.set(self.planTitles, forKey: "PlanTitles")
             
-            self.Places.remove(at: indexPath.row)
-            self.userDefaults.set(self.Places, forKey: "Places")
+            self.places.remove(at: indexPath.row)
+            self.userDefaults.set(self.places, forKey: "Places")
             
             tableView.deleteRows(at: [indexPath], with: .fade)
         }
@@ -152,8 +173,8 @@ class HomeViewController: UIViewController, UITableViewDelegate, UITableViewData
         }
         if identifier == "toPlanDetails" {
             let PlanDetailsVC = segue.destination as! PlanDetailsViewController
-            PlanDetailsVC.DateAndTime = self.DateAndTimes[(self.PlanTable.indexPathForSelectedRow?.row)!]
-            PlanDetailsVC.PlanTitle = self.PlanTitles[(self.PlanTable.indexPathForSelectedRow?.row)!]
+            PlanDetailsVC.DateAndTime = self.dateAndTimes[(self.planTable.indexPathForSelectedRow?.row)!]
+            PlanDetailsVC.PlanTitle = self.planTitles[(self.planTable.indexPathForSelectedRow?.row)!]
         }
     }
     
