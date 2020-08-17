@@ -7,9 +7,7 @@
 
 import UIKit
 
-class HomeViewController: UIViewController, /*UISearchBarDelegate,*/ UITableViewDelegate, UITableViewDataSource {
-    
-    // @IBOutlet weak var searchBar: UISearchBar!
+class HomeViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
     let userDefaults = UserDefaults.standard
     
@@ -42,6 +40,16 @@ class HomeViewController: UIViewController, /*UISearchBarDelegate,*/ UITableView
         }
         self.userDefaults.set(self.PlanTitles, forKey: "PlanTitles")
         
+        guard let sourceVC4 = sender.source as? AddPlanViewController, let Place = sourceVC4.address else {
+            return
+        }
+        if let selectedIndexPath = self.PlanTable.indexPathForSelectedRow {
+            self.Places[selectedIndexPath.row] = Place
+        } else {
+            self.Places.append(Place)
+        }
+        self.userDefaults.set(self.Places, forKey: "Places")
+        
         self.PlanTable.reloadData()
     }
     
@@ -60,26 +68,19 @@ class HomeViewController: UIViewController, /*UISearchBarDelegate,*/ UITableView
             self.PlanTitles = ["予定サンプル"]
         }
         
+        if self.userDefaults.object(forKey: "Places") != nil {
+            self.Places = self.userDefaults.stringArray(forKey: "Places")!
+        } else {
+            self.Places = ["場所"]
+        }
+        
         // self.ParticipantImgs = ["FriendsNoimg"]
         self.ParticipantNames = ["参加者"]
-        self.Places = ["場所"]
-        
-        /*
-         searchBar.delegate = self
-         searchBar.showsCancelButton = true
-         
-         //プレースホルダの指定
-         searchBar.placeholder = "友だち・場所を入力"
-         
-         //検索スコープを指定するボタン
-         //searchBar.scopeButtonTitles  = ["果物", "野菜"]
-         //searchBar.showsScopeBar = true
-         */
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        print(#function)
+        // print(#function)
 
         if let indexPath = PlanTable.indexPathForSelectedRow {
             PlanTable.deselectRow(at: indexPath, animated: true)
@@ -112,10 +113,10 @@ class HomeViewController: UIViewController, /*UISearchBarDelegate,*/ UITableView
          
          let ParticipantLabel = cell.viewWithTag(4) as! UILabel
          ParticipantLabel.text = self.ParticipantNames[indexPath.row]
-         
-         let PlaceLabel = cell.viewWithTag(5) as! UILabel
-         PlaceLabel.text = self.Places[indexPath.row]
          */
+        let placeLabel = cell.viewWithTag(5) as! UILabel
+        placeLabel.text = self.Places[indexPath.row]
+        
         return cell
     }
     
@@ -132,23 +133,15 @@ class HomeViewController: UIViewController, /*UISearchBarDelegate,*/ UITableView
             self.PlanTitles.remove(at: indexPath.row)
             self.userDefaults.set(self.PlanTitles, forKey: "PlanTitles")
             
+            self.Places.remove(at: indexPath.row)
+            self.userDefaults.set(self.Places, forKey: "Places")
+            
             tableView.deleteRows(at: [indexPath], with: .fade)
         }
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        // tableView.deselectRow(at: indexPath, animated: true) // セルの選択を解除
     }
-    
-    /*
-     func searchBarSearchButtonClicked(_ searchBar:UISearchBar) {
-     print("検索ボタンがタップ")
-     }
-     
-     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
-     print("キャンセルボタンがタップ")
-     }
-     */
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         // Get the new view controller using segue.destination.

@@ -13,7 +13,7 @@ class AddPlanViewController: UIViewController, UITableViewDelegate, UITableViewD
     
     var PlanTitle: String?
     var DateAndTime: String!
-    var address: String = ""
+    var address: String! // ?にすると値が渡らない
     var lon: String = ""
     var lat: String = ""
     
@@ -87,8 +87,9 @@ class AddPlanViewController: UIViewController, UITableViewDelegate, UITableViewD
         guard let button = sender as? UIBarButtonItem, button === self.saveButton else {
             return
         }
-        let indexPath = IndexPath(row: 0, section: 0)
         self.PlanTitle = self.PlanTitleTextField.text ?? ""
-        self.DateAndTime = (addPlanTable.cellForRow(at: indexPath) as? DateAndTimeCell)?.displayDateAndTimeTextField.text ?? ""
+        self.DateAndTime = (addPlanTable.cellForRow(at: IndexPath(row: 0, section: 0)) as? DateAndTimeCell)?.displayDateAndTimeTextField.text ?? ""
+        self.address = (addPlanTable.cellForRow(at: IndexPath(row: 2, section: 0)) as? PlaceCell)?.displayPlaceTextField.text ?? ""
     }
+    
 }
