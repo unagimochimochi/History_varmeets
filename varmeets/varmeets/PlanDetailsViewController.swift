@@ -13,6 +13,9 @@ class PlanDetailsViewController: UIViewController, UITableViewDelegate, UITableV
     
     var PlanTitle: String?
     var DateAndTime: String?
+    var place: String?
+    var lonStr: String?
+    var latStr: String?
     
     // @IBOutlet weak var PlanDetailsTableView: UITableView!
     @IBOutlet weak var DateAndTimeLabel: UILabel!
@@ -20,12 +23,12 @@ class PlanDetailsViewController: UIViewController, UITableViewDelegate, UITableV
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        if let DateAndTime = self.DateAndTime {
-            DateAndTimeLabel.text = DateAndTime
+        if let dateAndTime = self.DateAndTime {
+            DateAndTimeLabel.text = dateAndTime
         }
         
-        if let PlanTitle = self.PlanTitle {
-            self.navigationItem.title = PlanTitle
+        if let planTitle = self.PlanTitle {
+            self.navigationItem.title = planTitle
         }
     }
     
@@ -35,9 +38,23 @@ class PlanDetailsViewController: UIViewController, UITableViewDelegate, UITableV
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "PlanDetailsCell", for: indexPath)
-        cell.textLabel?.text = planItem[indexPath.row]
-        return cell
+        if indexPath.row == 1 {
+            let cell = tableView.dequeueReusableCell(withIdentifier: "PlanDetailPlaceCell", for: indexPath)
+            cell.textLabel?.text = planItem[indexPath.row]
+            
+            if let place = self.place {
+                let placeLabel = cell.viewWithTag(1) as! UILabel
+                placeLabel.text = place
+            }
+            
+            return cell
+            
+        } else {
+            let cell = tableView.dequeueReusableCell(withIdentifier: "PlanDetailsCell", for: indexPath)
+            cell.textLabel?.text = planItem[indexPath.row]
+            
+            return cell
+        }
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -57,9 +74,16 @@ class PlanDetailsViewController: UIViewController, UITableViewDelegate, UITableV
         }
         
         if identifier == "editPlan" {
-            let AddPlanVC = segue.destination as! AddPlanViewController
-            AddPlanVC.PlanTitle = self.PlanTitle
-            AddPlanVC.DateAndTime = self.DateAndTime
+            let addPlanVC = segue.destination as! AddPlanViewController
+            addPlanVC.PlanTitle = self.PlanTitle
+            addPlanVC.DateAndTime = self.DateAndTime
+        }
+
+        else if identifier == "toPlaceVC" {
+            let placeVC = segue.destination as! PlaceViewController
+            placeVC.place = self.place
+            placeVC.lonStr = self.lonStr ?? ""
+            placeVC.latStr = self.latStr ?? ""
         }
     }
     

@@ -122,11 +122,11 @@ class HomeViewController: UIViewController, UITableViewDelegate, UITableViewData
         let cell = tableView.dequeueReusableCell(withIdentifier: "PlanCell", for: indexPath)
         // let img = UIImage(named: participantImgs[indexPath.row] as! String)
         
-        let DateAndTimeLabel = cell.viewWithTag(1) as! UILabel
-        DateAndTimeLabel.text = self.dateAndTimes[indexPath.row]
+        let dateAndTimeLabel = cell.viewWithTag(1) as! UILabel
+        dateAndTimeLabel.text = self.dateAndTimes[indexPath.row]
         
-        let PlanTitleLabel = cell.viewWithTag(2) as! UILabel
-        PlanTitleLabel.text = self.planTitles[indexPath.row]
+        let planTitleLabel = cell.viewWithTag(2) as! UILabel
+        planTitleLabel.text = self.planTitles[indexPath.row]
         /*
          // let participantImageView = cell.viewWithTag(3) as! UIImageView
          // participantImageView.image = img
@@ -172,9 +172,12 @@ class HomeViewController: UIViewController, UITableViewDelegate, UITableViewData
             return
         }
         if identifier == "toPlanDetails" {
-            let PlanDetailsVC = segue.destination as! PlanDetailsViewController
-            PlanDetailsVC.DateAndTime = self.dateAndTimes[(self.planTable.indexPathForSelectedRow?.row)!]
-            PlanDetailsVC.PlanTitle = self.planTitles[(self.planTable.indexPathForSelectedRow?.row)!]
+            let planDetailsVC = segue.destination as! PlanDetailsViewController
+            planDetailsVC.DateAndTime = self.dateAndTimes[(self.planTable.indexPathForSelectedRow?.row)!]
+            planDetailsVC.PlanTitle = self.planTitles[(self.planTable.indexPathForSelectedRow?.row)!]
+            planDetailsVC.place = self.places[(self.planTable.indexPathForSelectedRow?.row)!]
+            planDetailsVC.lonStr = self.lons[(self.planTable.indexPathForSelectedRow?.row)!]
+            planDetailsVC.latStr = self.lats[(self.planTable.indexPathForSelectedRow?.row)!]
         }
     }
     
