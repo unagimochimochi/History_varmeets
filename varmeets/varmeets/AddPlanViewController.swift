@@ -9,11 +9,12 @@
 
 import UIKit
 
-class AddPlanViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
+class AddPlanViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UITextFieldDelegate {
     
     var PlanTitle: String?
     var DateAndTime: String!
-    var address: String! // ?にすると値が渡らない
+    var address: String?
+    var place: String?
     var lon: String = ""
     var lat: String = ""
     
@@ -34,6 +35,8 @@ class AddPlanViewController: UIViewController, UITableViewDelegate, UITableViewD
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        PlanTitleTextField.delegate = self
+        
         addPlanTable.dataSource = self
         
         if let PlanTitle = self.PlanTitle {
@@ -42,24 +45,38 @@ class AddPlanViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath:IndexPath) -> UITableViewCell {
-        // var lineupcell: UITableViewCell
         if indexPath.row == 0 {
             let cell = tableView.dequeueReusableCell(withIdentifier: "DateAndTimeCell", for:indexPath) as! DateAndTimeCell
             cell.textLabel?.text = planItem[indexPath.row]
             cell.displayDateAndTimeTextField.text = DateAndTime
+            
             return cell
+            
         } else if indexPath.row == 1 {
             let cell = tableView.dequeueReusableCell(withIdentifier: "ParticipantCell", for:indexPath) // as UITableViewCell
             cell.textLabel?.text = planItem[indexPath.row]
+            
             return cell
+            
         } else if indexPath.row == 2 {
             let cell = tableView.dequeueReusableCell(withIdentifier: "PlaceCell", for:indexPath) as! PlaceCell
             cell.textLabel?.text = planItem[indexPath.row]
-            cell.displayPlaceTextField.text = address
+            
+            // MapVCから住所が渡ってきたとき
+            if let address = self.address {
+                cell.displayPlaceTextField.text = address
+            }
+            // PlanDetailsVCから場所の名前が渡ってきたとき
+            if let place = self.place {
+                cell.displayPlaceTextField.text = place
+            }
+            
             return cell
+            
         } else {
             let cell = tableView.dequeueReusableCell(withIdentifier: "ParticipantCell", for:indexPath) // as UITableViewCell
             cell.textLabel?.text = planItem[indexPath.row]
+            
             return cell
         }
     }
@@ -82,6 +99,13 @@ class AddPlanViewController: UIViewController, UITableViewDelegate, UITableViewD
         }
     }
     
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        // キーボードを閉じる
+        self.view.endEditing(true)
+        
+        return true
+    }
+    
     override func prepare(for segue: UIStoryboardSegue, sender: Any!) {
         
         guard let button = sender as? UIBarButtonItem, button === self.saveButton else {
@@ -89,7 +113,7 @@ class AddPlanViewController: UIViewController, UITableViewDelegate, UITableViewD
         }
         self.PlanTitle = self.PlanTitleTextField.text ?? ""
         self.DateAndTime = (addPlanTable.cellForRow(at: IndexPath(row: 0, section: 0)) as? DateAndTimeCell)?.displayDateAndTimeTextField.text ?? ""
-        self.address = (addPlanTable.cellForRow(at: IndexPath(row: 2, section: 0)) as? PlaceCell)?.displayPlaceTextField.text ?? ""
+        self.place = (addPlanTable.cellForRow(at: IndexPath(row: 2, section: 0)) as? PlaceCell)?.displayPlaceTextField.text ?? ""
     }
     
 }

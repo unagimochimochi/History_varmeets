@@ -22,6 +22,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     var lon: String = ""
     var lat: String = ""
     
+    @IBOutlet var tapGesRec: UITapGestureRecognizer!
     @IBOutlet var longPressGesRec: UILongPressGestureRecognizer!
     
     override func viewDidLoad() {
@@ -49,7 +50,15 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
         self.view.addGestureRecognizer(hideTap)
     }
     
-    // ロングタップを検出する
+    // タップ検出
+    @IBAction func mapViewDiDTap(_ sender: UITapGestureRecognizer) {
+        if sender.state == .ended {
+            print("タップ")
+            mapView.removeAnnotation(pointAno)
+        }
+    }
+    
+    // ロングタップ検出
     @IBAction func mapViewDidLongPress(_ sender: UILongPressGestureRecognizer) {
         // ロングタップ開始
         if sender.state == .began {
