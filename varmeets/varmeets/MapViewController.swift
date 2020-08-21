@@ -11,23 +11,31 @@ import UIKit
 import CoreLocation
 import MapKit
 
-class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDelegate, UIGestureRecognizerDelegate, UITextFieldDelegate {
+class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDelegate, UIGestureRecognizerDelegate, UISearchBarDelegate {
     
-    @IBOutlet weak var textField: UITextField!
     @IBOutlet weak var mapView: MKMapView!
     var locationManager: CLLocationManager!
-    var pointAno: MKPointAnnotation = MKPointAnnotation()
+    var annotation: MKPointAnnotation = MKPointAnnotation()
     let geocoder = CLGeocoder()
     
-    var lon: String = ""
     var lat: String = ""
+    var lon: String = ""
+    
+    var searchAnnotationArray = [MKPointAnnotation]()
+    var searchAnnotationTitleArray = [String]()
+    var searchAnnotationLatArray = [String]()
+    var searchAnnotationLonArray = [String]()
     
     @IBOutlet var tapGesRec: UITapGestureRecognizer!
     @IBOutlet var longPressGesRec: UILongPressGestureRecognizer!
     
+    @IBOutlet weak var placeSearchBar: UISearchBar!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
+        
+        mapView.delegate = self
         
         // delegateを登録する
         locationManager = CLLocationManager()
@@ -36,25 +44,19 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
         }
         locationManager.delegate = self
         
-        mapView.delegate = self
-        
         // 位置情報取得の許可を得る
         locationManager.requestWhenInUseAuthorization()
         
         initMap()
-        
-        textField.delegate = self
-        
-        // キーボード以外をtapした際のアクションをviewに仕込む
-        let hideTap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(hideKyeoboard))
-        self.view.addGestureRecognizer(hideTap)
+
+        placeSearchBar.delegate = self
     }
     
     // タップ検出
     @IBAction func mapViewDiDTap(_ sender: UITapGestureRecognizer) {
         if sender.state == .ended {
             print("タップ")
-            mapView.removeAnnotation(pointAno)
+            mapView.removeAnnotation(annotation)
         }
     }
     
@@ -64,27 +66,36 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
         if sender.state == .began {
             print("ロングタップ開始")
             // ロングタップ開始時に古いピンを削除する
-            mapView.removeAnnotation(pointAno)
+            mapView.removeAnnotation(annotation)
+            mapView.removeAnnotations(searchAnnotationArray)
         }
         // ロングタップ終了（手を離した）
         else if sender.state == .ended {
             print("ロングタップ終了")
+            
+            // prepare(for:sender:) で場合分けするため配列を空にする
+            searchAnnotationArray.removeAll()
+            searchAnnotationTitleArray.removeAll()
+            searchAnnotationLatArray.removeAll()
+            searchAnnotationLonArray.removeAll()
+            
             // タップした位置(CGPoint)を指定してMKMapView上の緯度経度を取得する
             let tapPoint = sender.location(in: view)
             let center = mapView.convert(tapPoint, toCoordinateFrom: mapView)
             
-            let lonStr = center.longitude.description
             let latStr = center.latitude.description
-            print("lon: " + lonStr)
+            let lonStr = center.longitude.description
+            
             print("lat: " + latStr)
+            print("lon: " + lonStr)
             
             // 変数にタップした位置の緯度と経度をセット
-            lon = lonStr
             lat = latStr
+            lon = lonStr
             
             // 緯度と経度をString型からDouble型に変換
-            let lonNum = Double(lonStr)!
             let latNum = Double(latStr)!
+            let lonNum = Double(lonStr)!
             
             let location = CLLocation(latitude: latNum, longitude: lonNum)
             
@@ -95,10 +106,10 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
             print("distance: " + distance.description)
             
             // ロングタップを検出した位置にピンを立てる
-            pointAno.coordinate = center
-            mapView.addAnnotation(pointAno)
+            annotation.coordinate = center
+            mapView.addAnnotation(annotation)
             // ピンを最初から選択状態にする
-            mapView.selectAnnotation(pointAno, animated: true)
+            mapView.selectAnnotation(annotation, animated: true)
         }
     }
     
@@ -122,10 +133,6 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
         
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
-    }
-    
-    @objc func hideKyeoboard(recognizer : UITapGestureRecognizer){
-        self.view.endEditing(true)
     }
     
     // 2点間の距離(m)を算出する
@@ -159,8 +166,8 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
             else {
                 return
         }
-        print(administrativeArea + locality + throughfare + subThoroughfare)
-        self.pointAno.title = administrativeArea + locality + throughfare + subThoroughfare
+        
+        self.annotation.title = administrativeArea + locality + throughfare + subThoroughfare
     }
     
     // ピンの詳細設定
@@ -169,11 +176,6 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
         if annotation is MKUserLocation {
             return nil
         }
-        
-        let anoView = MKPinAnnotationView(annotation: pointAno, reuseIdentifier: nil)
-        
-        // 吹き出しを表示
-        anoView.canShowCallout = true
         
         // 吹き出し内の予定を追加ボタン
         let addPlanButton = UIButton()
@@ -185,10 +187,27 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
         addPlanButton.layer.masksToBounds = true
         addPlanButton.layer.cornerRadius = 8
         
-        // 吹き出しの右側にボタンをセット
-        anoView.rightCalloutAccessoryView = addPlanButton
+        // 配列が空のとき（ロングタップでピンを立てたとき）
+        if searchAnnotationTitleArray.isEmpty == true {
+            let annotationView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: nil)
+            // 吹き出しを表示
+            annotationView.canShowCallout = true
+            // 吹き出しの右側にボタンをセット
+            annotationView.rightCalloutAccessoryView = addPlanButton
+            
+            return annotationView
+        }
         
-        return anoView
+        // 配列が空ではないとき（検索でピンを立てたとき）
+        else {
+            let searchAnnotationView = MKPinAnnotationView(annotation: searchAnnotationArray as? MKAnnotation, reuseIdentifier: nil)
+            // 吹き出しを表示
+            searchAnnotationView.canShowCallout = true
+            // 吹き出しの右側にボタンをセット
+            searchAnnotationView.rightCalloutAccessoryView = addPlanButton
+            
+            return searchAnnotationView
+        }
     }
     
     // 吹き出しアクセサリー押下時
@@ -199,65 +218,114 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
         }
     }
     
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        print("検索")
+        mapView.removeAnnotation(annotation)
+        mapView.removeAnnotations(searchAnnotationArray)
+        
+        // キーボードをとじる
+        self.view.endEditing(true)
+        
+        // 検索条件を作成
+        let request = MKLocalSearch.Request()
+        request.naturalLanguageQuery = placeSearchBar.text
+        
+        // 検索範囲はMKMapViewと同じ
+        request.region = mapView.region
+        
+        let localSearch = MKLocalSearch(request: request)
+        localSearch.start(completionHandler: LocalSearchCompHandler(response:error:))
+    }
+    
+    // start(completionHandler:)の引数
+    func LocalSearchCompHandler(response: MKLocalSearch.Response?, error: Error?) -> Void {
+        // 検索がヒットしたとき
+        if let response = response {
+            for searchLocation in (response.mapItems) {
+                if error == nil {
+                    let searchAnnotation = MKPointAnnotation()
+                    // ピンの座標
+                    let center = CLLocationCoordinate2DMake(searchLocation.placemark.coordinate.latitude, searchLocation.placemark.coordinate.longitude)
+                    searchAnnotation.coordinate = center
+                    
+                    let latStr = center.latitude.description
+                    let lonStr = center.longitude.description
+                    
+                    // 変数に検索した位置の緯度と経度をセット
+                    searchAnnotationLatArray.append(latStr)
+                    searchAnnotationLonArray.append(lonStr)
+                    
+                    // タイトルに場所の名前を表示
+                    searchAnnotation.title = searchLocation.placemark.name
+                    // ピンを立てる
+                    mapView.addAnnotation(searchAnnotation)
+                    
+                    // searchAnnotation配列にピンをセット
+                    searchAnnotationArray.append(searchAnnotation)
+                    // searchAnnotationTitle配列に場所の名前をセット
+                    searchAnnotationTitleArray.append(searchAnnotation.title ?? "")
+                    
+                } else {
+                    print("error")
+                }
+            }
+        }
+        
+        // 検索がヒットしなかったとき
+        else {
+            let dialog = UIAlertController(title: "検索結果なし", message: "ご迷惑をおかけします。\nどうしてもヒットしない場合は住所を入力してみてください！", preferredStyle: .alert)
+            // OKボタン
+            dialog.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+            // ダイアログを表示
+            self.present(dialog, animated: true, completion: nil)
+        }
+        
+        if searchAnnotationLatArray.isEmpty == false {
+            // String型からDouble型に変換し、0番目の緯度と経度を取り出す
+            let searchLocationLatNum = Double(searchAnnotationLatArray[0])!
+            let searchLocationLonNum = Double(searchAnnotationLonArray[0])!
+            
+            // 0番目のピンを中心に表示
+            let center = CLLocationCoordinate2D(latitude: searchLocationLatNum, longitude: searchLocationLonNum)
+            mapView.setCenter(center, animated: true)
+            
+        } else {
+            print("配列が空")
+        }
+    }
+    
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        print("検索キャンセル")
+        
+        // テキストを空にする
+        placeSearchBar.text = ""
+        // キーボードをとじる
+        self.view.endEditing(true)
+    }
+    
     // 遷移時に住所と緯度と経度を渡す
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         guard let identifier = segue.identifier else {
             return
         }
+        
         if identifier == "toAddPlanVC" {
             let addPlanVC = segue.destination as! AddPlanViewController
-            addPlanVC.address = self.pointAno.title ?? ""
-            addPlanVC.lon = self.lon
-            addPlanVC.lat = self.lat
-        }
-    }
-    
-    // キーボードの検索ボタン押下時
-    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        // キーボードを閉じる
-        self.view.endEditing(true)
-        // 現在表示中のピンをすべて消す
-        self.mapView.removeAnnotations(mapView.annotations)
-        
-        guard let address = textField.text else {
-            return false
-        }
-        
-        CLGeocoder().geocodeAddressString(address) { [weak mapView] placemarks, error in
-            guard let loc = placemarks?.first?.location?.coordinate else {
-                return
+            
+            // 配列が空のとき（ロングタップでピンを立てたとき）
+            if searchAnnotationTitleArray.isEmpty == true {
+                addPlanVC.address = self.annotation.title ?? ""
+                addPlanVC.lat = self.lat
+                addPlanVC.lon = self.lon
             }
             
-            // 地図の中心を設定
-            mapView?.setCenter(loc, animated: true)
-            // 縮尺を設定
-            let region = MKCoordinateRegion(center: loc, span: MKCoordinateSpan(latitudeDelta: 0.02, longitudeDelta: 0.02))
-            
-            Map.search(query: "駅", region: region) { (result) in // queryに"駅"と入れると検索地周辺の駅を検索
-                switch result {
-                case .success(let mapItems):
-                    for map in mapItems {
-                        let annotation = MKPointAnnotation()
-                        annotation.coordinate = map.placemark.coordinate
-                        annotation.title = map.name ?? "名前がありません"
-                        mapView?.addAnnotation(annotation)
-                    }
-                case .failure(let error):
-                    print("error \(error.localizedDescription)")
-                }
+            // 配列が空ではないとき（検索でピンを立てたとき）
+            else {
+                addPlanVC.address = self.searchAnnotationTitleArray[0]
+                addPlanVC.lat = self.searchAnnotationLatArray[0]
+                addPlanVC.lon = self.searchAnnotationLonArray[0]
             }
-            
-            let annotation = MKPointAnnotation()
-            annotation.coordinate = loc
-            annotation.title = "検索地"
-            mapView?.addAnnotation(annotation)
-            
-            mapView?.setRegion(region,animated:true)
         }
-        
-        self.textField.text = ""
-        
-        return true
     }
     
 }
