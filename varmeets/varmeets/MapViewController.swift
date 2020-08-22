@@ -22,9 +22,6 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     var lon: String = ""
     
     var searchAnnotationArray = [MKPointAnnotation]()
-    var searchAnnotationTitleArray = [String]()
-    var searchAnnotationLatArray = [String]()
-    var searchAnnotationLonArray = [String]()
     
     @IBOutlet var tapGesRec: UITapGestureRecognizer!
     @IBOutlet var longPressGesRec: UILongPressGestureRecognizer!
@@ -75,9 +72,6 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
             
             // prepare(for:sender:) で場合分けするため配列を空にする
             searchAnnotationArray.removeAll()
-            searchAnnotationTitleArray.removeAll()
-            searchAnnotationLatArray.removeAll()
-            searchAnnotationLonArray.removeAll()
             
             // タップした位置(CGPoint)を指定してMKMapView上の緯度経度を取得する
             let tapPoint = sender.location(in: view)
@@ -188,7 +182,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
         addPlanButton.layer.cornerRadius = 8
         
         // 配列が空のとき（ロングタップでピンを立てたとき）
-        if searchAnnotationTitleArray.isEmpty == true {
+        if searchAnnotationArray.isEmpty == true {
             let annotationView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: nil)
             // 吹き出しを表示
             annotationView.canShowCallout = true
@@ -223,6 +217,9 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
         mapView.removeAnnotation(annotation)
         mapView.removeAnnotations(searchAnnotationArray)
         
+        // 前回の検索結果の配列を空にする
+        searchAnnotationArray.removeAll()
+        
         // キーボードをとじる
         self.view.endEditing(true)
         
@@ -248,13 +245,6 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
                     let center = CLLocationCoordinate2DMake(searchLocation.placemark.coordinate.latitude, searchLocation.placemark.coordinate.longitude)
                     searchAnnotation.coordinate = center
                     
-                    let latStr = center.latitude.description
-                    let lonStr = center.longitude.description
-                    
-                    // 変数に検索した位置の緯度と経度をセット
-                    searchAnnotationLatArray.append(latStr)
-                    searchAnnotationLonArray.append(lonStr)
-                    
                     // タイトルに場所の名前を表示
                     searchAnnotation.title = searchLocation.placemark.name
                     // ピンを立てる
@@ -262,8 +252,6 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
                     
                     // searchAnnotation配列にピンをセット
                     searchAnnotationArray.append(searchAnnotation)
-                    // searchAnnotationTitle配列に場所の名前をセット
-                    searchAnnotationTitleArray.append(searchAnnotation.title ?? "")
                     
                 } else {
                     print("error")
@@ -280,13 +268,10 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
             self.present(dialog, animated: true, completion: nil)
         }
         
-        if searchAnnotationLatArray.isEmpty == false {
-            // String型からDouble型に変換し、0番目の緯度と経度を取り出す
-            let searchLocationLatNum = Double(searchAnnotationLatArray[0])!
-            let searchLocationLonNum = Double(searchAnnotationLonArray[0])!
-            
-            // 0番目のピンを中心に表示
-            let center = CLLocationCoordinate2D(latitude: searchLocationLatNum, longitude: searchLocationLonNum)
+        // 0番目のピンを中心に表示
+        if searchAnnotationArray.isEmpty == false {
+            let searchAnnotation = searchAnnotationArray[0]
+            let center = CLLocationCoordinate2D(latitude: searchAnnotation.coordinate.latitude, longitude: searchAnnotation.coordinate.longitude)
             mapView.setCenter(center, animated: true)
             
         } else {
@@ -313,7 +298,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
             let addPlanVC = segue.destination as! AddPlanViewController
             
             // 配列が空のとき（ロングタップでピンを立てたとき）
-            if searchAnnotationTitleArray.isEmpty == true {
+            if searchAnnotationArray.isEmpty == true {
                 addPlanVC.address = self.annotation.title ?? ""
                 addPlanVC.lat = self.lat
                 addPlanVC.lon = self.lon
@@ -321,9 +306,22 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
             
             // 配列が空ではないとき（検索でピンを立てたとき）
             else {
-                addPlanVC.address = self.searchAnnotationTitleArray[0]
-                addPlanVC.lat = self.searchAnnotationLatArray[0]
-                addPlanVC.lon = self.searchAnnotationLonArray[0]
+                // 選択されているピンを新たな配列に格納
+                let selectedSearchAnnotationArray = mapView.selectedAnnotations
+                
+                // 選択されているピンは1つのため、0番目を取り出す
+                let selectedSearchAnnotation = selectedSearchAnnotationArray[0]
+                
+                // ピンの緯度と経度を取得
+                let latStr = selectedSearchAnnotation.coordinate.latitude.description
+                let lonStr = selectedSearchAnnotation.coordinate.longitude.description
+                
+                // 選択されているピンからタイトルを取得
+                if let selectedSearchAnnotationTitle = selectedSearchAnnotation.title {
+                    addPlanVC.address = selectedSearchAnnotationTitle ?? ""
+                    addPlanVC.lat = latStr
+                    addPlanVC.lon = lonStr
+                }
             }
         }
     }
