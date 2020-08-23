@@ -8,9 +8,18 @@
 import UIKit
 import MapKit
 
-class SearchPlaceViewController: UIViewController, UISearchBarDelegate {
+class SearchPlaceViewController: UIViewController, UISearchBarDelegate, UITableViewDelegate, UITableViewDataSource {
     
     @IBOutlet weak var placeSearchBar: UISearchBar!
+    @IBOutlet weak var resultsTableView: UITableView!
+    
+    var place: String?
+    var lat: String?
+    var lon: String?
+    
+    var placeArray = [String]()
+    var latArray = [String]()
+    var lonArray = [String]()
     
     @IBAction func cancelButton(_ sender: Any) {
         self.dismiss(animated: true, completion: nil)
@@ -24,6 +33,13 @@ class SearchPlaceViewController: UIViewController, UISearchBarDelegate {
     
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         print("検索")
+        
+        // 前回の検索結果の配列を空にする
+        placeArray.removeAll()
+        lonArray.removeAll()
+        latArray.removeAll()
+        
+        resultsTableView.reloadData()
         
         // キーボードをとじる
         self.view.endEditing(true)
@@ -45,21 +61,22 @@ class SearchPlaceViewController: UIViewController, UISearchBarDelegate {
         if let response = response {
             for searchLocation in (response.mapItems) {
                 if error == nil {
-                    // 検索場所の座標
-                    // let center = CLLocationCoordinate2DMake(searchLocation.placemark.coordinate.latitude, searchLocation.placemark.coordinate.longitude)
-                    
+                    let place = searchLocation.placemark.name
                     let latStr = searchLocation.placemark.coordinate.latitude.description
                     let lonStr = searchLocation.placemark.coordinate.longitude.description
-                    let place = searchLocation.placemark.name
                     
                     if let place = place {
-                        print("緯度: \(latStr), 経度: \(lonStr), 名前: \(place)")
+                        // 配列に検索結果を追加
+                        placeArray.append(place)
+                        latArray.append(latStr)
+                        lonArray.append(lonStr)
                     }
                     
                 } else {
                     print("error")
                 }
             }
+            resultsTableView.reloadData()
         }
         
         // 検索がヒットしなかったとき
@@ -71,10 +88,34 @@ class SearchPlaceViewController: UIViewController, UISearchBarDelegate {
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
         print("検索キャンセル")
         
+        // 前回の検索結果の配列を空にする
+        placeArray.removeAll()
+        lonArray.removeAll()
+        latArray.removeAll()
+        
+        resultsTableView.reloadData()
+        
         // テキストを空にする
         placeSearchBar.text = ""
         // キーボードをとじる
         self.view.endEditing(true)
+    }
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return placeArray.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "ResultCell", for:indexPath)
+        cell.textLabel?.text = placeArray[indexPath.row]
+        
+        return cell
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        place = placeArray[(resultsTableView.indexPathForSelectedRow?.row)!]
+        lat = latArray[(resultsTableView.indexPathForSelectedRow?.row)!]
+        lon = lonArray[(resultsTableView.indexPathForSelectedRow?.row)!]
     }
     
 }

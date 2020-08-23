@@ -44,6 +44,21 @@ class AddPlanViewController: UIViewController, UITableViewDelegate, UITableViewD
         }
     }
     
+    // 場所を選択画面からの巻き戻し
+    @IBAction func unwindToAddPlanVCFromSearchPlaceVC(sender: UIStoryboardSegue) {
+        guard let sourceVC = sender.source as? SearchPlaceViewController,
+            let place = sourceVC.place,
+            let lat = sourceVC.lat,
+            let lon = sourceVC.lon else {
+            return
+        }
+        self.address = place
+        self.lat = lat
+        self.lon = lon
+        
+        addPlanTable.reloadData()
+    }
+    
     func tableView(_ tableView: UITableView, cellForRowAt indexPath:IndexPath) -> UITableViewCell {
         if indexPath.row == 0 {
             let cell = tableView.dequeueReusableCell(withIdentifier: "DateAndTimeCell", for:indexPath) as! DateAndTimeCell
