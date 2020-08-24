@@ -21,6 +21,9 @@ class SearchPlaceViewController: UIViewController, UISearchBarDelegate, UITableV
     var latArray = [String]()
     var lonArray = [String]()
     
+    // AddPlanVCで日時が出力されている場合、一時的に保存
+    var dateAndTime: String?
+    
     @IBAction func cancelButton(_ sender: Any) {
         self.dismiss(animated: true, completion: nil)
     }
@@ -29,6 +32,7 @@ class SearchPlaceViewController: UIViewController, UISearchBarDelegate, UITableV
         super.viewDidLoad()
         
         placeSearchBar.delegate = self
+        print(dateAndTime ?? "変数〈dateAndTime〉はnilです")
     }
     
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {

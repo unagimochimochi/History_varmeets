@@ -46,15 +46,18 @@ class AddPlanViewController: UIViewController, UITableViewDelegate, UITableViewD
     
     // 場所を選択画面からの巻き戻し
     @IBAction func unwindToAddPlanVCFromSearchPlaceVC(sender: UIStoryboardSegue) {
-        guard let sourceVC = sender.source as? SearchPlaceViewController,
-            let place = sourceVC.place,
-            let lat = sourceVC.lat,
-            let lon = sourceVC.lon else {
-            return
+        if let sourceVC = sender.source as? SearchPlaceViewController {
+            // 日時をすでに出力していたとき
+            if let dateAndTime = sourceVC.dateAndTime {
+                self.DateAndTime = dateAndTime
+            }
+            
+            if let place = sourceVC.place, let lat = sourceVC.lat, let lon = sourceVC.lon {
+                self.address = place
+                self.lat = lat
+                self.lon = lon
+            }
         }
-        self.address = place
-        self.lat = lat
-        self.lon = lon
         
         addPlanTable.reloadData()
     }
@@ -123,12 +126,21 @@ class AddPlanViewController: UIViewController, UITableViewDelegate, UITableViewD
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any!) {
         
+        if let identifier = segue.identifier {
+            if identifier == "toSearchPlaceVC" {
+                let searchPlaceVC = segue.destination as! SearchPlaceViewController
+                self.DateAndTime = (addPlanTable.cellForRow(at: IndexPath(row: 0, section: 0)) as? DateAndTimeCell)?.displayDateAndTimeTextField.text ?? ""
+                searchPlaceVC.dateAndTime = self.DateAndTime
+            }
+        }
+        
         guard let button = sender as? UIBarButtonItem, button === self.saveButton else {
             return
         }
         self.PlanTitle = self.PlanTitleTextField.text ?? ""
         self.DateAndTime = (addPlanTable.cellForRow(at: IndexPath(row: 0, section: 0)) as? DateAndTimeCell)?.displayDateAndTimeTextField.text ?? ""
         self.place = (addPlanTable.cellForRow(at: IndexPath(row: 2, section: 0)) as? PlaceCell)?.displayPlaceTextField.text ?? ""
+        
     }
     
 }
