@@ -13,11 +13,14 @@ class SearchPlaceViewController: UIViewController, UISearchBarDelegate, UITableV
     @IBOutlet weak var placeSearchBar: UISearchBar!
     @IBOutlet weak var resultsTableView: UITableView!
     
+    let geocoder = CLGeocoder()
+    
     var place: String?
     var lat: String?
     var lon: String?
     
     var placeArray = [String]()
+    var addressArray = [String]()
     var latArray = [String]()
     var lonArray = [String]()
     
@@ -40,6 +43,7 @@ class SearchPlaceViewController: UIViewController, UISearchBarDelegate, UITableV
         
         // 前回の検索結果の配列を空にする
         placeArray.removeAll()
+        addressArray.removeAll()
         lonArray.removeAll()
         latArray.removeAll()
         
@@ -66,21 +70,23 @@ class SearchPlaceViewController: UIViewController, UISearchBarDelegate, UITableV
             for searchLocation in (response.mapItems) {
                 if error == nil {
                     let place = searchLocation.placemark.name
-                    let latStr = searchLocation.placemark.coordinate.latitude.description
-                    let lonStr = searchLocation.placemark.coordinate.longitude.description
+                    let latNum = searchLocation.placemark.coordinate.latitude
+                    let lonNum = searchLocation.placemark.coordinate.longitude
                     
                     if let place = place {
                         // 配列に検索結果を追加
                         placeArray.append(place)
-                        latArray.append(latStr)
-                        lonArray.append(lonStr)
+                        latArray.append(latNum.description)
+                        lonArray.append(lonNum.description)
                     }
+                    
+                    let location = CLLocation(latitude: latNum, longitude: lonNum)
+                    geocoder.reverseGeocodeLocation(location, preferredLocale: nil, completionHandler: GeocodeCompHandler(placemarks:error:))
                     
                 } else {
                     print("error")
                 }
             }
-            resultsTableView.reloadData()
         }
         
         // 検索がヒットしなかったとき
@@ -89,11 +95,29 @@ class SearchPlaceViewController: UIViewController, UISearchBarDelegate, UITableV
         }
     }
     
+    // reverseGeocodeLocation(_:preferredLocale:completionHandler:)の第3引数
+    func GeocodeCompHandler(placemarks: [CLPlacemark]?, error: Error?) {
+        guard let placemark = placemarks?.first, error == nil,
+            let administrativeArea = placemark.administrativeArea, //県
+            let locality = placemark.locality, // 市区町村
+            let throughfare = placemark.thoroughfare, // 丁目を含む地名
+            let subThoroughfare = placemark.subThoroughfare // 番地
+            else {
+                return
+        }
+        
+        // 配列に住所を追加
+        addressArray.append(administrativeArea + locality + throughfare + subThoroughfare)
+        
+        resultsTableView.reloadData()
+    }
+    
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
         print("検索キャンセル")
         
         // 前回の検索結果の配列を空にする
         placeArray.removeAll()
+        addressArray.removeAll()
         lonArray.removeAll()
         latArray.removeAll()
         
@@ -112,6 +136,9 @@ class SearchPlaceViewController: UIViewController, UISearchBarDelegate, UITableV
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ResultCell", for:indexPath)
         cell.textLabel?.text = placeArray[indexPath.row]
+        
+        cell.detailTextLabel?.textColor = UIColor.gray
+        cell.detailTextLabel?.text = addressArray[indexPath.row]
         
         return cell
     }
