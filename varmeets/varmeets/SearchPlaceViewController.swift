@@ -80,36 +80,29 @@ class SearchPlaceViewController: UIViewController, UISearchBarDelegate, UITableV
                         lonArray.append(lonNum.description)
                     }
                     
-                    let location = CLLocation(latitude: latNum, longitude: lonNum)
-                    geocoder.reverseGeocodeLocation(location, preferredLocale: nil, completionHandler: GeocodeCompHandler(placemarks:error:))
+                    guard let administrativeArea = searchLocation.placemark.administrativeArea, // 県
+                        let locality = searchLocation.placemark.locality, // 市区町村
+                        let throughfare = searchLocation.placemark.thoroughfare, // 丁目を含む地名
+                        let subThoroughfare = searchLocation.placemark.subThoroughfare // 番地
+                        else {
+                            return
+                    }
+                    
+                    // 配列に住所を追加
+                    addressArray.append(administrativeArea + locality + throughfare + subThoroughfare)
                     
                 } else {
                     print("error")
                 }
             }
+            
+            resultsTableView.reloadData()
         }
         
         // 検索がヒットしなかったとき
         else {
             print("検索結果なし")
         }
-    }
-    
-    // reverseGeocodeLocation(_:preferredLocale:completionHandler:)の第3引数
-    func GeocodeCompHandler(placemarks: [CLPlacemark]?, error: Error?) {
-        guard let placemark = placemarks?.first, error == nil,
-            let administrativeArea = placemark.administrativeArea, //県
-            let locality = placemark.locality, // 市区町村
-            let throughfare = placemark.thoroughfare, // 丁目を含む地名
-            let subThoroughfare = placemark.subThoroughfare // 番地
-            else {
-                return
-        }
-        
-        // 配列に住所を追加
-        addressArray.append(administrativeArea + locality + throughfare + subThoroughfare)
-        
-        resultsTableView.reloadData()
     }
     
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
