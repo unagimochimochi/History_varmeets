@@ -13,6 +13,7 @@ class HomeViewController: UIViewController, UITableViewDelegate, UITableViewData
     
     @IBOutlet weak var planTable: UITableView!
     var dateAndTimes = [String]()
+    var estimatedTimes = [Date]()
     var planTitles = [String]()
     // var participantImgs = [UIImage]()
     var participantNames = [String]()
@@ -20,44 +21,71 @@ class HomeViewController: UIViewController, UITableViewDelegate, UITableViewData
     var lons = [String]()
     var lats = [String]()
     
+    @IBOutlet weak var countdownView: UIView!
+    @IBOutlet weak var countdownViewHeight: NSLayoutConstraint!
+    @IBOutlet weak var countdownLabel: UILabel!
+    @IBOutlet weak var countdownDateAndTimeLabel: UILabel!
+    @IBOutlet weak var countdownPlanTitleLabel: UILabel!
+    
     @IBAction func unwindtoHomeVC(sender: UIStoryboardSegue) {
         // 日時
         guard let sourceVC1 = sender.source as? AddPlanViewController, let dateAndTime = sourceVC1.DateAndTime else {
             return
         }
+        
         if let selectedIndexPath = self.planTable.indexPathForSelectedRow {
             self.dateAndTimes[selectedIndexPath.row] = dateAndTime
+            self.estimatedTimes[selectedIndexPath.row] = sourceVC1.estimatedTime
+            
         } else {
             self.dateAndTimes.append(dateAndTime)
+            self.estimatedTimes.append(sourceVC1.estimatedTime)
+            
+            // 表示する時刻の設定
+            let dateFormatter = DateFormatter()
+            dateFormatter.locale = Locale(identifier: "ja_JP")
+            dateFormatter.timeZone = .autoupdatingCurrent
+            dateFormatter.dateStyle = .full
+            dateFormatter.timeStyle = .short
+            print("0番目→\(dateFormatter.string(from: estimatedTimes[0])) , 1番目→\(dateFormatter.string(from: estimatedTimes[1]))")
         }
+        
         self.userDefaults.set(self.dateAndTimes, forKey: "DateAndTimes")
+        self.userDefaults.set(self.estimatedTimes, forKey: "EstimatedTimes")
         
         // 予定タイトル
         guard let sourceVC2 = sender.source as? AddPlanViewController, let planTitle = sourceVC2.PlanTitle else {
             return
         }
+        
         if let selectedIndexPath = self.planTable.indexPathForSelectedRow {
             self.planTitles[selectedIndexPath.row] = planTitle
+            
         } else {
             self.planTitles.append(planTitle)
         }
+        
         self.userDefaults.set(self.planTitles, forKey: "PlanTitles")
         
         // 場所
-        guard let sourceVC4 = sender.source as? AddPlanViewController, let place = sourceVC4.address else {
+        guard let sourceVC4 = sender.source as? AddPlanViewController, let place = sourceVC4.place else {
             return
         }
+        
         let lon = sourceVC4.lon
         let lat = sourceVC4.lat
+        
         if let selectedIndexPath = self.planTable.indexPathForSelectedRow {
             self.places[selectedIndexPath.row] = place
             self.lons[selectedIndexPath.row] = lon
             self.lats[selectedIndexPath.row] = lat
+            
         } else {
             self.places.append(place)
             self.lons.append(lon)
             self.lats.append(lat)
         }
+        
         self.userDefaults.set(self.places, forKey: "Places")
         self.userDefaults.set(self.lons, forKey: "lons")
         self.userDefaults.set(self.lats, forKey: "lats")
@@ -68,10 +96,21 @@ class HomeViewController: UIViewController, UITableViewDelegate, UITableViewData
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        countdownViewHeight.constant = 0
+        countdownDateAndTimeLabel.isHidden = true
+        countdownPlanTitleLabel.isHidden = true
+        
         if self.userDefaults.object(forKey: "DateAndTimes") != nil {
             self.dateAndTimes = self.userDefaults.stringArray(forKey: "DateAndTimes")!
         } else {
             self.dateAndTimes = ["日時"]
+        }
+        
+        if self.userDefaults.object(forKey: "EstimatedTimes") != nil {
+            self.estimatedTimes = self.userDefaults.array(forKey: "EstimatedTimes") as! [Date]
+        } else {
+            let now = Date()
+            self.estimatedTimes = [now]
         }
         
         if self.userDefaults.object(forKey: "PlanTitles") != nil {
@@ -151,11 +190,20 @@ class HomeViewController: UIViewController, UITableViewDelegate, UITableViewData
             self.dateAndTimes.remove(at: indexPath.row)
             self.userDefaults.set(self.dateAndTimes, forKey: "DateAndTimes")
             
+            self.estimatedTimes.remove(at: indexPath.row)
+            self.userDefaults.set(self.estimatedTimes, forKey: "EstimatedTimes")
+            
             self.planTitles.remove(at: indexPath.row)
             self.userDefaults.set(self.planTitles, forKey: "PlanTitles")
             
             self.places.remove(at: indexPath.row)
             self.userDefaults.set(self.places, forKey: "Places")
+            
+            self.lons.remove(at: indexPath.row)
+            self.userDefaults.set(self.lons, forKey: "lons")
+            
+            self.lats.remove(at: indexPath.row)
+            self.userDefaults.set(self.lats, forKey: "lats")
             
             tableView.deleteRows(at: [indexPath], with: .fade)
         }

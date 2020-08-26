@@ -18,6 +18,8 @@ class AddPlanViewController: UIViewController, UITableViewDelegate, UITableViewD
     var lon: String = ""
     var lat: String = ""
     
+    var estimatedTime = Date()
+    
     @IBOutlet weak var addPlanTable: UITableView!
     
     @IBOutlet weak var PlanTitleTextField: UITextField!
@@ -67,6 +69,7 @@ class AddPlanViewController: UIViewController, UITableViewDelegate, UITableViewD
             let cell = tableView.dequeueReusableCell(withIdentifier: "DateAndTimeCell", for:indexPath) as! DateAndTimeCell
             cell.textLabel?.text = planItem[indexPath.row]
             cell.displayDateAndTimeTextField.text = DateAndTime
+            estimatedTime = cell.estimatedTime
             
             return cell
             
