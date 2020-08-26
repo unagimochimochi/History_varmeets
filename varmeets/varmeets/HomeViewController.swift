@@ -14,6 +14,7 @@ class HomeViewController: UIViewController, UITableViewDelegate, UITableViewData
     @IBOutlet weak var planTable: UITableView!
     var dateAndTimes = [String]()
     var estimatedTimes = [Date]()
+    var estimatedTimesSort = [Date]()
     var planTitles = [String]()
     // var participantImgs = [UIImage]()
     var participantNames = [String]()
@@ -47,7 +48,7 @@ class HomeViewController: UIViewController, UITableViewDelegate, UITableViewData
             dateFormatter.timeZone = .autoupdatingCurrent
             dateFormatter.dateStyle = .full
             dateFormatter.timeStyle = .short
-            print("0番目→\(dateFormatter.string(from: estimatedTimes[0])) , 1番目→\(dateFormatter.string(from: estimatedTimes[1]))")
+            // print("0番目→\(dateFormatter.string(from: estimatedTimes[0])) , 1番目→\(dateFormatter.string(from: estimatedTimes[1]))")
         }
         
         self.userDefaults.set(self.dateAndTimes, forKey: "DateAndTimes")
@@ -100,6 +101,9 @@ class HomeViewController: UIViewController, UITableViewDelegate, UITableViewData
         countdownDateAndTimeLabel.isHidden = true
         countdownPlanTitleLabel.isHidden = true
         
+        // 1秒ごとに処理
+        Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(update), userInfo: nil, repeats: true)
+        
         if self.userDefaults.object(forKey: "DateAndTimes") != nil {
             self.dateAndTimes = self.userDefaults.stringArray(forKey: "DateAndTimes")!
         } else {
@@ -109,8 +113,9 @@ class HomeViewController: UIViewController, UITableViewDelegate, UITableViewData
         if self.userDefaults.object(forKey: "EstimatedTimes") != nil {
             self.estimatedTimes = self.userDefaults.array(forKey: "EstimatedTimes") as! [Date]
         } else {
-            let now = Date()
-            self.estimatedTimes = [now]
+            // estimatedTimesの初期値に 00:00:00 UTC on 1 January 2001 を設定
+            let referenceDate = Date(timeIntervalSinceReferenceDate: 0.0)
+            self.estimatedTimes = [referenceDate]
         }
         
         if self.userDefaults.object(forKey: "PlanTitles") != nil {
@@ -210,6 +215,23 @@ class HomeViewController: UIViewController, UITableViewDelegate, UITableViewData
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    }
+    
+    @objc func update() {
+        // 表示する時刻の設定
+        let dateFormatter = DateFormatter()
+        dateFormatter.locale = Locale(identifier: "ja_JP")
+        dateFormatter.timeZone = .autoupdatingCurrent
+        dateFormatter.dateStyle = .full
+        dateFormatter.timeStyle = .medium
+        
+        if estimatedTimes.count >= 2 {
+            // 並べ替え用の配列に予定時刻をセット
+            estimatedTimesSort = estimatedTimes
+            // 並べ替え用の配列で並べ替え
+            estimatedTimesSort.sort { $0 < $1 }
+            print(dateFormatter.string(from: estimatedTimesSort[1]))
+        }
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
