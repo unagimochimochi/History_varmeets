@@ -218,19 +218,28 @@ class HomeViewController: UIViewController, UITableViewDelegate, UITableViewData
     }
     
     @objc func update() {
-        // 表示する時刻の設定
-        let dateFormatter = DateFormatter()
-        dateFormatter.locale = Locale(identifier: "ja_JP")
-        dateFormatter.timeZone = .autoupdatingCurrent
-        dateFormatter.dateStyle = .full
-        dateFormatter.timeStyle = .medium
+        let now = Date()
+        let calendar = Calendar(identifier: .japanese)
         
         if estimatedTimes.count >= 2 {
             // 並べ替え用の配列に予定時刻をセット
             estimatedTimesSort = estimatedTimes
             // 並べ替え用の配列で並べ替え
             estimatedTimesSort.sort { $0 < $1 }
-            print(dateFormatter.string(from: estimatedTimesSort[1]))
+            
+            let components = calendar.dateComponents([.year, .day, .hour, .minute, .second], from: now, to: estimatedTimesSort[1])
+            
+            // 1時間未満のとき
+            if components.year! == 0 && components.day! == 0 && components.hour! == 0 &&
+                components.minute! >= 0 && components.minute! <= 59 &&
+                components.second! >= 0 && components.second! <= 59 {
+                // カウントダウンラベルを表示
+                countdownLabel.isHidden = false
+                // カウントダウンビューの高さを戻して見えるようにする
+                countdownViewHeight.constant = 200
+                // 分と秒を表示
+                countdownLabel.text = String(format: "%02d:%02d", components.minute!, components.second!)
+            }
         }
     }
     
