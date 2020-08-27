@@ -27,6 +27,7 @@ class HomeViewController: UIViewController, UITableViewDelegate, UITableViewData
     @IBOutlet weak var countdownLabel: UILabel!
     @IBOutlet weak var countdownDateAndTimeLabel: UILabel!
     @IBOutlet weak var countdownPlanTitleLabel: UILabel!
+    @IBOutlet weak var completeButton: UIButton!
     
     @IBAction func unwindtoHomeVC(sender: UIStoryboardSegue) {
         // 日時
@@ -97,10 +98,9 @@ class HomeViewController: UIViewController, UITableViewDelegate, UITableViewData
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        countdownViewHeight.constant = 0
-        countdownDateAndTimeLabel.isHidden = true
-        countdownPlanTitleLabel.isHidden = true
-        
+        // カウントダウンを非表示
+        hiddenCountdown()
+
         // 1秒ごとに処理
         Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(update), userInfo: nil, repeats: true)
         
@@ -221,26 +221,99 @@ class HomeViewController: UIViewController, UITableViewDelegate, UITableViewData
         let now = Date()
         let calendar = Calendar(identifier: .japanese)
         
-        if estimatedTimes.count >= 2 {
-            // 並べ替え用の配列に予定時刻をセット
-            estimatedTimesSort = estimatedTimes
-            // 並べ替え用の配列で並べ替え
-            estimatedTimesSort.sort { $0 < $1 }
-            
-            let components = calendar.dateComponents([.year, .day, .hour, .minute, .second], from: now, to: estimatedTimesSort[1])
-            
-            // 1時間未満のとき
-            if components.year! == 0 && components.day! == 0 && components.hour! == 0 &&
-                components.minute! >= 0 && components.minute! <= 59 &&
-                components.second! >= 0 && components.second! <= 59 {
-                // カウントダウンラベルを表示
-                countdownLabel.isHidden = false
-                // カウントダウンビューの高さを戻して見えるようにする
-                countdownViewHeight.constant = 200
-                // 分と秒を表示
-                countdownLabel.text = String(format: "%02d:%02d", components.minute!, components.second!)
+        // 予定サンプルが消されていないとき
+        if planTitles.contains("予定サンプル") == true {
+            // サンプル以外の予定が登録されているとき
+            if estimatedTimes.count >= 2 {
+                print("サンプルあり、サンプル以外の予定あり")
+                // 並べ替え用の配列に予定時刻をセット
+                estimatedTimesSort = estimatedTimes
+                // 並べ替え用の配列で並べ替え
+                estimatedTimesSort.sort { $0 < $1 }
+                
+                let components = calendar.dateComponents([.year, .day, .hour, .minute, .second], from: now, to: estimatedTimesSort[1])
+                
+                // 1時間未満のとき
+                if components.year! == 0 && components.day! == 0 && components.hour! == 0 &&
+                    components.minute! >= 0 && components.minute! <= 59 &&
+                    components.second! >= 0 && components.second! <= 59 {
+                    print("サンプルあり、1時間未満の予定あり")
+                    // カウントダウンを表示
+                    displayCountdown()
+                    
+                    countdownLabel.text = String(format: "%02d:%02d", components.minute!, components.second!)
+                }
+            }
+                
+            // 予定がサンプルのみのとき
+            else {
+                print("サンプルのみ")
+                // カウントダウンを非表示
+                hiddenCountdown()
             }
         }
+        
+        // 予定サンプルが消されているとき
+        else {
+            // 予定が複数個登録されているとき
+            if estimatedTimes.count >= 2 {
+                // 並べ替え用の配列に予定時刻をセット
+                estimatedTimesSort = estimatedTimes
+                // 並べ替え用の配列で並べ替え
+                estimatedTimesSort.sort { $0 < $1 }
+                
+                let components = calendar.dateComponents([.year, .day, .hour, .minute, .second], from: now, to: estimatedTimesSort[0])
+                
+                // 1時間未満のとき
+                if components.year! == 0 && components.day! == 0 && components.hour! == 0 &&
+                    components.minute! >= 0 && components.minute! <= 59 &&
+                    components.second! >= 0 && components.second! <= 59 {
+                    // カウントダウンを表示
+                    displayCountdown()
+                    
+                    countdownLabel.text = String(format: "%02d:%02d", components.minute!, components.second!)
+                }
+            }
+            
+            // 予定がひとつだけ登録されているとき
+            else if estimatedTimes.count == 1 {
+                let components = calendar.dateComponents([.year, .day, .hour, .minute, .second], from: now, to: estimatedTimes[0])
+                
+                // 1時間未満のとき
+                if components.year! == 0 && components.day! == 0 && components.hour! == 0 &&
+                    components.minute! >= 0 && components.minute! <= 59 &&
+                    components.second! >= 0 && components.second! <= 59 {
+                    // カウントダウンを表示
+                    displayCountdown()
+                    
+                    countdownLabel.text = String(format: "%02d:%02d", components.minute!, components.second!)
+                    countdownDateAndTimeLabel.text = dateAndTimes[0]
+                    countdownPlanTitleLabel.text = planTitles[0]
+                }
+            }
+            
+            // 予定がひとつも登録されていないとき
+            else {
+                // カウントダウンを非表示
+                hiddenCountdown()
+            }
+        }
+    }
+    
+    func displayCountdown() {
+        countdownViewHeight.constant = 200
+        countdownLabel.isHidden = false
+        countdownDateAndTimeLabel.isHidden = false
+        countdownPlanTitleLabel.isHidden = false
+        completeButton.isHidden = false
+    }
+    
+    func hiddenCountdown() {
+        countdownViewHeight.constant = 0
+        countdownLabel.isHidden = true
+        countdownDateAndTimeLabel.isHidden = true
+        countdownPlanTitleLabel.isHidden = true
+        completeButton.isHidden = true
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
